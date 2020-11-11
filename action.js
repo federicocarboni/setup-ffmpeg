@@ -1,4 +1,5 @@
 'use strict';
+const path = require('path');
 const os = require('os');
 
 const core = require('@actions/core');
@@ -7,8 +8,14 @@ const tc = require('@actions/tool-cache');
 
 const windows = async () => {
 };
-const ubuntu = async () => {};
-const macos = async () => {};
+const ubuntu = async () => {
+  const downloadPath = await tc.downloadTool('https://johnvansickle.com/ffmpeg/builds/ffmpeg-git-amd64-static.tar.xz');
+  const binPath = await tc.extractTar(downloadPath);
+  core.setOutput('ffmpeg-path', path.join(binPath, 'ffmpeg'));
+  core.setOutput('ffprobe-path', path.join(binPath, 'ffprobe'));
+};
+const macos = async () => {
+};
 
 const platform = os.platform();
 
@@ -19,5 +26,5 @@ if (platform === 'linux') {
 } else if (platform === 'darwin') {
   macos();
 } else {
-  core.setFailed(new TypeError());
+  core.setFailed(`Unsupported platform ${platform}`);
 }
