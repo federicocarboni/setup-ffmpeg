@@ -13,8 +13,11 @@ const windows = async () => {
 const ubuntu = async () => {
   const downloadPath = await tc.downloadTool('https://johnvansickle.com/ffmpeg/builds/ffmpeg-git-amd64-static.tar.xz');
   const binPath = await tc.extractTar(downloadPath, void 0, ['-x']);
-  await io.mv(binPath + '/ffmpeg-git-*-static/{ffmpeg,ffprobe}', binPath);
-  await io.rmRF(binPath + '/ffmpeg-git-*-static/');
+  const globber = await glob.create(binPath + '/ffmpeg-git-*-static/{ffmpeg,ffprobe}');
+  for (const exe of await globber.glob()) {
+    await io.mv(exe, binPath);
+  }
+  await io.rmRF((await (await glob.create(binPath + '/ffmpeg-git-*-static/')).glob())[0]);
   core.info(await tc.cacheFile(binPath, 'ffmpeg-git-linux-am64'));
   core.setOutput('ffmpeg-path', path.join(binPath, 'ffmpeg'));
   core.setOutput('ffprobe-path', path.join(binPath, 'ffprobe'));
