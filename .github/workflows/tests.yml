@@ -1,0 +1,24 @@
+name: tests
+
+on:
+  pull_request:
+    paths-ignore:
+      - '**.md'
+  push:
+    branches: [master]
+    paths-ignore:
+      - '**.md'
+
+jobs:
+  runs-on: ${{ matrix.runs-on }}
+
+  strategy:
+    matrix:
+      runs-on: [ubuntu-latest]
+
+  steps:
+    - uses: actions/checkout@v2
+    - name: FedericoCarboni/setup-ffmpeg
+      id: setup-ffmpeg
+      uses: ./
+    - run: echo ${{ steps.setup-ffmpeg.outputs.ffmpeg-path }} ${{ steps.setup-ffmpeg.outputs.ffprobe-path }}
