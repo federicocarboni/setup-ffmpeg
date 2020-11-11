@@ -1,0 +1,23 @@
+{
+  "name": "setup-ffmpeg",
+  "version": "1.0.0",
+  "description": "",
+  "main": "action.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FedericoCarboni/setup-ffmpeg.git"
+  },
+  "keywords": [],
+  "author": {
+    "name": "Federico Carboni",
+    "email": "fr3ddydev@gmail.com"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/FedericoCarboni/setup-ffmpeg/issues"
+  },
+  "homepage": "https://github.com/FedericoCarboni/setup-ffmpeg#readme"
+}
