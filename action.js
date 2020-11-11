@@ -13,7 +13,7 @@ const windows = async () => {
 const ubuntu = async () => {
   const downloadPath = await tc.downloadTool('https://johnvansickle.com/ffmpeg/builds/ffmpeg-git-amd64-static.tar.xz');
   const binPath = await tc.extractTar(downloadPath, void 0, ['-x']);
-  const globber = await glob.create(binPath + '/ffmpeg-git-*-static/{ffmpeg,ffprobe}');
+  const globber = await glob.create(binPath + '/ffmpeg-git-*-static/ff*');
   for (const exe of await globber.glob()) {
     await io.mv(exe, binPath);
   }
