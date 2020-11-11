@@ -10,11 +10,11 @@ on:
       - '**.md'
 
 jobs:
-  runs-on: ${{ matrix.runs-on }}
+  runs-on: ${{ matrix.os }}
 
   strategy:
     matrix:
-      runs-on: [ubuntu-latest]
+      os: [ubuntu-latest]
 
   steps:
     - uses: actions/checkout@v2
