@@ -1,2 +1,6 @@
 name: Setup FFmpeg
-description: Setup 
+description: Setup
+
+runs:
+  using: node12
+  main: action.js
