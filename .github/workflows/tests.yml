@@ -10,15 +10,16 @@ on:
       - '**.md'
 
 jobs:
-  runs-on: ${{ matrix.os }}
+  test:
+    runs-on: ${{ matrix.os }}
 
-  strategy:
-    matrix:
-      os: [ubuntu-latest]
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
 
-  steps:
-    - uses: actions/checkout@v2
-    - name: FedericoCarboni/setup-ffmpeg
-      id: setup-ffmpeg
-      uses: ./
-    - run: echo ${{ steps.setup-ffmpeg.outputs.ffmpeg-path }} ${{ steps.setup-ffmpeg.outputs.ffprobe-path }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: FedericoCarboni/setup-ffmpeg
+        id: setup-ffmpeg
+        uses: ./
+      - run: echo ${{ steps.setup-ffmpeg.outputs.ffmpeg-path }} ${{ steps.setup-ffmpeg.outputs.ffprobe-path }}
