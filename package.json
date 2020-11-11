@@ -19,5 +19,13 @@
   "bugs": {
     "url": "https://github.com/FedericoCarboni/setup-ffmpeg/issues"
   },
-  "homepage": "https://github.com/FedericoCarboni/setup-ffmpeg#readme"
+  "homepage": "https://github.com/FedericoCarboni/setup-ffmpeg#readme",
+  "devDependencies": {
+    "@types/node": "^14.14.7"
+  },
+  "dependencies": {
+    "@actions/core": "^1.2.6",
+    "@actions/http-client": "^1.0.9",
+    "@actions/tool-cache": "^1.6.0"
+  }
 }
