@@ -18,7 +18,7 @@ const ubuntu = async () => {
     await io.mv(exe, binPath);
   }
   await io.rmRF((await (await glob.create(binPath + '/ffmpeg-git-*-static/')).glob())[0]);
-  core.info(await tc.cacheFile(binPath, 'ffmpeg-git-linux-am64', 'ffmpeg', '4.3.1'));
+  core.info(await tc.cacheDir(binPath, 'ffmpeg-git-linux-am64', 'ffmpeg', '4.3.1'));
   core.setOutput('ffmpeg-path', path.join(binPath, 'ffmpeg'));
   core.setOutput('ffprobe-path', path.join(binPath, 'ffprobe'));
 };
