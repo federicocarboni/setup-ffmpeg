@@ -10,7 +10,7 @@ const windows = async () => {
 };
 const ubuntu = async () => {
   const downloadPath = await tc.downloadTool('https://johnvansickle.com/ffmpeg/builds/ffmpeg-git-amd64-static.tar.xz');
-  const binPath = await tc.extractXar(downloadPath);
+  const binPath = await tc.extractTar(downloadPath, void 0, ['xf']);
   core.setOutput('ffmpeg-path', path.join(binPath, 'ffmpeg'));
   core.setOutput('ffprobe-path', path.join(binPath, 'ffprobe'));
 };
