@@ -4982,8 +4982,9 @@ const linux = () => __awaiter(void 0, void 0, void 0, function* () {
             external_assert_.ok(version);
             return version;
         }
-        catch (_b) {
-            return yield fetchVersion(retry - 1);
+        finally {
+            if (retry)
+                return yield fetchVersion(retry - 1);
         }
     });
     const version = yield fetchVersion();
