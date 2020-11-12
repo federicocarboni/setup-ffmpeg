@@ -17,7 +17,7 @@ const linux = async () => {
     try {
       const response = await client.get('https://johnvansickle.com/ffmpeg/release-readme.txt');
       const readme = await response.readBody();
-      const [ , version ] = /version: (.*?)\n/.exec(readme) ?? [];
+      const [, version] = /version: (.*?)\n/.exec(readme) ?? [];
       assert.ok(version);
       return version;
     } finally {
@@ -25,6 +25,7 @@ const linux = async () => {
         return await fetchVersion(retry - 1);
     }
   };
+  core.info('Fetching version...');
   const version = await fetchVersion();
   core.info(`Downloading ffmpeg v${version}`);
   const downloadPath = await tc.downloadTool('https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz');
