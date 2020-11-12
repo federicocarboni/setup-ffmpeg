@@ -8,16 +8,21 @@ import * as hc from '@actions/http-client';
 import * as tc from '@actions/tool-cache';
 
 const client = new hc.HttpClient('FedericoCarboni/setup-ffmpeg', [], {
+  socketTimeout: 5000,
   allowRetries: true,
 });
 
 const linux = async () => {
-  const fetchVersion = async () => {
-    const response = await client.get('https://johnvansickle.com/ffmpeg/release-readme.txt');
-    const readme = await response.readBody();
-    const [ , version ] = /version: (.*?)\n/.exec(readme) ?? [];
-    assert.ok(version);
-    return version;
+  const fetchVersion = async (retry = 10): Promise<string> => {
+    try {
+      const response = await client.get('https://johnvansickle.com/ffmpeg/release-readme.txt');
+      const readme = await response.readBody();
+      const [ , version ] = /version: (.*?)\n/.exec(readme) ?? [];
+      assert.ok(version);
+      return version;
+    } catch {
+      return await fetchVersion(retry - 1);
+    }
   };
   const version = await fetchVersion();
   core.info(`Downloading ffmpeg v${version}`);
