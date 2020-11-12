@@ -4994,7 +4994,7 @@ const linux = () => __awaiter(void 0, void 0, void 0, function* () {
 const install = () => __awaiter(void 0, void 0, void 0, function* () {
     // TODO: support 32-bit
     external_assert_.strictEqual(external_os_.arch(), 'x64');
-    const path = tool_cache.find('ffmpeg', '4.x');
+    const path = tool_cache.find('ffmpeg', '4.3.1');
     if (path) {
         core.info(`Found ffmpeg installation at ${path}`);
         return path;
