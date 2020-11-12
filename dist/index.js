@@ -4987,6 +4987,7 @@ const linux = () => __awaiter(void 0, void 0, void 0, function* () {
                 return yield fetchVersion(retry - 1);
         }
     });
+    core.info('Fetching version...');
     const version = yield fetchVersion();
     core.info(`Downloading ffmpeg v${version}`);
     const downloadPath = yield tool_cache.downloadTool('https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz');
