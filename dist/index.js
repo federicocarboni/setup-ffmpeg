@@ -4941,10 +4941,12 @@ __webpack_require__.r(__webpack_exports__);
 var core = __webpack_require__(186);
 // EXTERNAL MODULE: external "assert"
 var external_assert_ = __webpack_require__(357);
-// EXTERNAL MODULE: external "os"
-var external_os_ = __webpack_require__(87);
+// EXTERNAL MODULE: external "path"
+var external_path_ = __webpack_require__(622);
 // EXTERNAL MODULE: external "fs"
 var external_fs_ = __webpack_require__(747);
+// EXTERNAL MODULE: external "os"
+var external_os_ = __webpack_require__(87);
 // EXTERNAL MODULE: ./node_modules/@actions/http-client/index.js
 var http_client = __webpack_require__(925);
 // EXTERNAL MODULE: ./node_modules/@actions/tool-cache/lib/tool-cache.js
@@ -4959,6 +4961,7 @@ var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _argume
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+
 
 
 
@@ -4980,7 +4983,7 @@ const linux = () => __awaiter(void 0, void 0, void 0, function* () {
     const downloadPath = yield tool_cache.downloadTool('https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz');
     core.info(`Extracting ffmpeg from ${downloadPath}`);
     const extractPath = yield tool_cache.extractTar(downloadPath, void 0, ['-x']);
-    const sourceDir = external_fs_.readdirSync(extractPath)[0];
+    const sourceDir = external_path_.join(extractPath, external_fs_.readdirSync(extractPath)[0]);
     core.info(`Caching ffmpeg from ${sourceDir}`);
     const cachedPath = yield tool_cache.cacheDir(sourceDir, 'ffmpeg', version);
     core.info(`Cached ffmpeg to ${cachedPath}`);
