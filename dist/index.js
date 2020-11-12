@@ -4968,7 +4968,10 @@ var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _argume
 
 
 
-const client = new http_client.HttpClient('FedericoCarboni/setup-ffmpeg');
+const client = new http_client.HttpClient('FedericoCarboni/setup-ffmpeg', [], {
+    socketTimeout: 10,
+    allowRetries: true,
+});
 const linux = () => __awaiter(void 0, void 0, void 0, function* () {
     const fetchVersion = () => __awaiter(void 0, void 0, void 0, function* () {
         var _a;
