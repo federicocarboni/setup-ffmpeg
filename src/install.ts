@@ -1,6 +1,7 @@
 import * as assert from 'assert';
-import * as os from 'os';
+import * as path from 'path';
 import * as fs from 'fs';
+import * as os from 'os';
 
 import * as core from '@actions/core';
 import * as hc from '@actions/http-client';
@@ -21,7 +22,7 @@ const linux = async () => {
   const downloadPath = await tc.downloadTool('https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz');
   core.info(`Extracting ffmpeg from ${downloadPath}`);
   const extractPath = await tc.extractTar(downloadPath, void 0, ['-x']);
-  const sourceDir = fs.readdirSync(extractPath)[0];
+  const sourceDir = path.join(extractPath, fs.readdirSync(extractPath)[0]);
   core.info(`Caching ffmpeg from ${sourceDir}`);
   const cachedPath = await tc.cacheDir(sourceDir, 'ffmpeg', version);
   core.info(`Cached ffmpeg to ${cachedPath}`);
