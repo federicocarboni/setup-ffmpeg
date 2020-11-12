@@ -20,8 +20,11 @@ const linux = async () => {
       assert.ok(version);
       return version;
     } finally {
-      if (retry)
+      core.info('Failed to fetch latest version...');
+      if (retry) {
+        core.info('Retrying...')
         return await fetchVersion(retry - 1);
+      }
     }
   };
   core.info('Fetching version...');
@@ -42,7 +45,7 @@ export const install = async (): Promise<string> => {
   assert.strictEqual(os.arch(), 'x64');
 
   core.info(tc.findAllVersions('ffmpeg').join(', '));
-  const path = tc.find('ffmpeg', '4.3.1');
+  const path = tc.find('ffmpeg', '4.x');
   if (path) {
     core.info(`Found ffmpeg installation at ${path}`);
     return path;
