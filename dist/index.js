@@ -4982,8 +4982,11 @@ const linux = () => __awaiter(void 0, void 0, void 0, function* () {
             return version;
         }
         finally {
-            if (retry)
+            core.info('Failed to fetch latest version...');
+            if (retry) {
+                core.info('Retrying...');
                 return yield fetchVersion(retry - 1);
+            }
         }
     });
     core.info('Fetching version...');
@@ -5002,7 +5005,7 @@ const install = () => __awaiter(void 0, void 0, void 0, function* () {
     // TODO: support 32-bit
     external_assert_.strictEqual(external_os_.arch(), 'x64');
     core.info(tool_cache.findAllVersions('ffmpeg').join(', '));
-    const path = tool_cache.find('ffmpeg', '4.3.1');
+    const path = tool_cache.find('ffmpeg', '4.x');
     if (path) {
         core.info(`Found ffmpeg installation at ${path}`);
         return path;
