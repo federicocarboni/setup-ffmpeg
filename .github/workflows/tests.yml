@@ -19,6 +19,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: FedericoCarboni/setup-ffmpeg
+        uses: ./
+      - name: FedericoCarboni/setup-ffmpeg
         id: setup-ffmpeg
         uses: ./
       - run: echo ${{ steps.setup-ffmpeg.outputs.ffmpeg-path }} ${{ steps.setup-ffmpeg.outputs.ffprobe-path }}
