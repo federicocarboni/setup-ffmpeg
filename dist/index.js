@@ -4969,7 +4969,6 @@ var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _argume
 
 
 const client = new http_client.HttpClient('FedericoCarboni/setup-ffmpeg', [], {
-    socketTimeout: 10,
     allowRetries: true,
 });
 const linux = () => __awaiter(void 0, void 0, void 0, function* () {
@@ -4997,6 +4996,7 @@ const install = () => __awaiter(void 0, void 0, void 0, function* () {
     external_assert_.strictEqual(external_os_.arch(), 'x64');
     const path = tool_cache.find('ffmpeg', '4.x');
     if (path) {
+        core.info(`Found ffmpeg installation at ${path}`);
         return path;
     }
     switch (external_os_.platform()) {
