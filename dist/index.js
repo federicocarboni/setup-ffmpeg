@@ -4969,16 +4969,22 @@ var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _argume
 
 
 const client = new http_client.HttpClient('FedericoCarboni/setup-ffmpeg', [], {
+    socketTimeout: 5000,
     allowRetries: true,
 });
 const linux = () => __awaiter(void 0, void 0, void 0, function* () {
-    const fetchVersion = () => __awaiter(void 0, void 0, void 0, function* () {
+    const fetchVersion = (retry = 10) => __awaiter(void 0, void 0, void 0, function* () {
         var _a;
-        const response = yield client.get('https://johnvansickle.com/ffmpeg/release-readme.txt');
-        const readme = yield response.readBody();
-        const [, version] = (_a = /version: (.*?)\n/.exec(readme)) !== null && _a !== void 0 ? _a : [];
-        external_assert_.ok(version);
-        return version;
+        try {
+            const response = yield client.get('https://johnvansickle.com/ffmpeg/release-readme.txt');
+            const readme = yield response.readBody();
+            const [, version] = (_a = /version: (.*?)\n/.exec(readme)) !== null && _a !== void 0 ? _a : [];
+            external_assert_.ok(version);
+            return version;
+        }
+        catch (_b) {
+            return yield fetchVersion(retry - 1);
+        }
     });
     const version = yield fetchVersion();
     core.info(`Downloading ffmpeg v${version}`);
