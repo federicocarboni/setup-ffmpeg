@@ -9,7 +9,6 @@ import * as tc from '@actions/tool-cache';
 
 const client = new hc.HttpClient('FedericoCarboni/setup-ffmpeg', [], {
   socketTimeout: 5000,
-  allowRetries: true,
 });
 
 const linux = async () => {
