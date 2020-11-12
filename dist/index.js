@@ -4937,16 +4937,16 @@ module.exports = v4;
 // ESM COMPAT FLAG
 __webpack_require__.r(__webpack_exports__);
 
+// EXTERNAL MODULE: external "path"
+var external_path_ = __webpack_require__(622);
+// EXTERNAL MODULE: external "os"
+var external_os_ = __webpack_require__(87);
 // EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
 var core = __webpack_require__(186);
 // EXTERNAL MODULE: external "assert"
 var external_assert_ = __webpack_require__(357);
-// EXTERNAL MODULE: external "path"
-var external_path_ = __webpack_require__(622);
 // EXTERNAL MODULE: external "fs"
 var external_fs_ = __webpack_require__(747);
-// EXTERNAL MODULE: external "os"
-var external_os_ = __webpack_require__(87);
 // EXTERNAL MODULE: ./node_modules/@actions/http-client/index.js
 var http_client = __webpack_require__(925);
 // EXTERNAL MODULE: ./node_modules/@actions/tool-cache/lib/tool-cache.js
@@ -5016,9 +5016,16 @@ var main_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arg
 };
 
 
+
+
+const EXE_EXT = external_os_.platform() === 'win32' ? '.exe' : '';
 const main = () => main_awaiter(void 0, void 0, void 0, function* () {
     try {
-        yield install();
+        const installPath = yield install();
+        core.addPath(installPath);
+        core.setOutput('path', installPath);
+        core.setOutput('ffmpeg-path', external_path_.join(installPath, `ffmpeg${EXE_EXT}`));
+        core.setOutput('ffprobe-path', external_path_.join(installPath, `ffprobe${EXE_EXT}`));
     }
     catch (error) {
         core.setFailed(error);
