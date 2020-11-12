@@ -41,6 +41,7 @@ export const install = async (): Promise<string> => {
   // TODO: support 32-bit
   assert.strictEqual(os.arch(), 'x64');
 
+  core.info(tc.findAllVersions('ffmpeg').join(', '));
   const path = tc.find('ffmpeg', '4.3.1');
   if (path) {
     core.info(`Found ffmpeg installation at ${path}`);
