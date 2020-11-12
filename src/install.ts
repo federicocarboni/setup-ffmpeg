@@ -20,8 +20,9 @@ const linux = async () => {
       const [ , version ] = /version: (.*?)\n/.exec(readme) ?? [];
       assert.ok(version);
       return version;
-    } catch {
-      return await fetchVersion(retry - 1);
+    } finally {
+      if (retry)
+        return await fetchVersion(retry - 1);
     }
   };
   const version = await fetchVersion();
