@@ -37,6 +37,7 @@ export const install = async (): Promise<string> => {
 
   const path = tc.find('ffmpeg', '4.x');
   if (path) {
+    core.info(`Found ffmpeg installation at ${path}`);
     return path;
   }
 
