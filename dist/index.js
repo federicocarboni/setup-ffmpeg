@@ -4970,7 +4970,7 @@ var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _argume
 
 const firstChild = (dir) => external_fs_.readdirSync(dir)[0];
 const linux = () => __awaiter(void 0, void 0, void 0, function* () {
-    const fetchVersion = (retry = 10) => __awaiter(void 0, void 0, void 0, function* () {
+    const fetchVersion = (retry = 40) => __awaiter(void 0, void 0, void 0, function* () {
         var _a;
         try {
             const client = new http_client.HttpClient('FedericoCarboni/setup-ffmpeg', [], {
@@ -5004,7 +5004,7 @@ const linux = () => __awaiter(void 0, void 0, void 0, function* () {
     return cachedPath;
 });
 const windows = () => __awaiter(void 0, void 0, void 0, function* () {
-    const fetchVersion = (retry = 10) => __awaiter(void 0, void 0, void 0, function* () {
+    const fetchVersion = (retry = 40) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const client = new http_client.HttpClient('FedericoCarboni/setup-ffmpeg', [], {
                 socketTimeout: 1000,
