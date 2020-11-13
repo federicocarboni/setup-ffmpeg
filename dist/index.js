@@ -4979,7 +4979,7 @@ const fetch = (url) => __awaiter(void 0, void 0, void 0, function* () {
         core.info(`fetching information from ${url}`);
         const http = new http_client.HttpClient(userAgent, [], {
             allowRetries: false,
-            socketTimeout: 10000,
+            socketTimeout: 1000,
         });
         const response = yield http.get(url);
         if (response.message.statusCode !== 200)
