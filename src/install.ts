@@ -17,7 +17,7 @@ const fetch = async (url: string): Promise<string> => {
     core.info(`fetching information from ${url}`);
     const http = new hc.HttpClient(userAgent, [], {
       allowRetries: false,
-      socketTimeout: 10000,
+      socketTimeout: 1000,
     });
     const response = await http.get(url);
     if (response.message.statusCode !== 200)
