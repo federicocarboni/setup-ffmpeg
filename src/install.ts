@@ -89,6 +89,8 @@ export const install = async (): Promise<string> => {
     return await linux();
   case 'win32':
     return await windows();
+  // TODO: support macos
+  case 'darwin':
   default:
     throw new Error();  // TODO: add an error message
   }
