@@ -20,7 +20,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - run: curl https://johnvansickle.com/ffmpeg/release-readme.txt | grep version
       - name: Run FedericoCarboni/setup-ffmpeg
         uses: ./
       - name: Run FedericoCarboni/setup-ffmpeg
