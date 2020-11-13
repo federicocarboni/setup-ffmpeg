@@ -4939,14 +4939,16 @@ __webpack_require__.r(__webpack_exports__);
 
 // EXTERNAL MODULE: external "path"
 var external_path_ = __webpack_require__(622);
-// EXTERNAL MODULE: external "os"
-var external_os_ = __webpack_require__(87);
 // EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
 var core = __webpack_require__(186);
 // EXTERNAL MODULE: external "assert"
 var external_assert_ = __webpack_require__(357);
 // EXTERNAL MODULE: external "fs"
 var external_fs_ = __webpack_require__(747);
+// EXTERNAL MODULE: external "os"
+var external_os_ = __webpack_require__(87);
+// EXTERNAL MODULE: ./node_modules/@actions/exec/lib/exec.js
+var exec = __webpack_require__(514);
 // EXTERNAL MODULE: ./node_modules/@actions/http-client/index.js
 var http_client = __webpack_require__(925);
 // EXTERNAL MODULE: ./node_modules/@actions/tool-cache/lib/tool-cache.js
@@ -4971,18 +4973,18 @@ var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _argume
 
 
 
+
 const userAgent = 'FedericoCarboni/setup-ffmpeg';
 const firstChild = (dir) => external_fs_.readdirSync(dir)[0];
 const fetch = (url) => __awaiter(void 0, void 0, void 0, function* () {
     const retryHelper = new retry_helper.RetryHelper(3, 10, 20);
     return retryHelper.execute(() => __awaiter(void 0, void 0, void 0, function* () {
-        core.info(`fetching information from ${url}`);
+        core.info(`fetching ${url}`);
         const http = new http_client.HttpClient(userAgent, [], {
             allowRetries: false,
             socketTimeout: 1000,
         });
         const response = yield http.get(url);
-        core.info('fetched response');
         if (response.message.statusCode !== 200)
             throw new tool_cache.HTTPError(response.message.statusCode);
         return yield response.readBody();
@@ -4992,55 +4994,66 @@ const fetch = (url) => __awaiter(void 0, void 0, void 0, function* () {
         return err instanceof tool_cache.HTTPError || errorCode === 'ETIMEDOUT' || errorCode === 'ECONNREFUSED';
     });
 });
+const testInstallation = (installPath) => __awaiter(void 0, void 0, void 0, function* () {
+    core.info('testing installation');
+    external_assert_.ok((yield exec.exec(external_path_.join(installPath, `ffmpeg${EXE_EXT}`), ['-version'])) === 0, 'Expected ffmpeg to exit with code 0');
+    external_assert_.ok((yield exec.exec(external_path_.join(installPath, `ffprobe${EXE_EXT}`), ['-version'])) === 0, 'Expected ffprobe to exit with code 0');
+    core.info('installation successful');
+});
 const linux = () => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
-    core.info('Fetching version...');
+    core.info('fetching latest version...');
     const info = yield fetch('https://johnvansickle.com/ffmpeg/release-readme.txt');
     const [, version] = (_a = /version: (.*?)\n/.exec(info)) !== null && _a !== void 0 ? _a : [];
     external_assert_.ok(version);
-    core.info(`Downloading ffmpeg v${version}`);
+    core.info(`downloading ffmpeg v${version}`);
     const downloadPath = yield tool_cache.downloadTool('https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz');
-    core.info(`Extracting ffmpeg from ${downloadPath}`);
+    core.info(`extracting ffmpeg from ${downloadPath}`);
     const extractPath = yield tool_cache.extractTar(downloadPath, void 0, ['-x']);
     const sourceDir = external_path_.join(extractPath, firstChild(extractPath));
-    core.info(`Caching ffmpeg from ${sourceDir}`);
+    core.info(`caching ffmpeg from ${sourceDir}`);
     const cachedPath = yield tool_cache.cacheDir(sourceDir, 'ffmpeg', version);
-    core.info(`Cached ffmpeg to ${cachedPath}`);
+    core.info(`cached ffmpeg to ${cachedPath}`);
     return cachedPath;
 });
 const windows = () => __awaiter(void 0, void 0, void 0, function* () {
-    core.info('Fetching version...');
+    core.info('fetching latest version...');
     const info = yield fetch('https://www.gyan.dev/ffmpeg/builds/release-version');
     const [version] = info.trim().split('-');
-    core.info(`Downloading ffmpeg v${version}`);
+    core.info(`downloading ffmpeg v${version}`);
     const downloadPath = yield tool_cache.downloadTool('https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full.7z');
-    core.info(`Extracting ffmpeg from ${downloadPath}`);
+    core.info(`extracting ffmpeg from ${downloadPath}`);
     const extractPath = yield tool_cache.extract7z(downloadPath);
     const sourceDir = external_path_.join(extractPath, firstChild(extractPath), 'bin');
-    core.info(`Caching ffmpeg from ${sourceDir}`);
+    core.info(`caching ffmpeg from ${sourceDir}`);
     const cachedPath = yield tool_cache.cacheDir(sourceDir, 'ffmpeg', version);
-    core.info(`Cached ffmpeg to ${cachedPath}`);
+    core.info(`cached ffmpeg to ${cachedPath}`);
     return cachedPath;
 });
+const EXE_EXT = external_os_.platform() === 'win32' ? '.exe' : '';
 const install = () => __awaiter(void 0, void 0, void 0, function* () {
     // TODO: support 32-bit
     external_assert_.strictEqual(external_os_.arch(), 'x64');
-    core.info(tool_cache.findAllVersions('ffmpeg').join(', '));
     const path = tool_cache.find('ffmpeg', '4.x');
     if (path) {
-        core.info(`Found ffmpeg installation at ${path}`);
+        core.info(`found cached installation ${path}`);
         return path;
     }
+    let installPath;
     switch (external_os_.platform()) {
         case 'linux':
-            return yield linux();
+            installPath = yield linux();
+            break;
         case 'win32':
-            return yield windows();
+            installPath = yield windows();
+            break;
         // TODO: support macos
         case 'darwin':
         default:
             throw new Error(); // TODO: add an error message
     }
+    yield testInstallation(installPath);
+    return installPath;
 });
 
 // CONCATENATED MODULE: ./src/main.ts
@@ -5056,8 +5069,6 @@ var main_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arg
 
 
 
-
-const EXE_EXT = external_os_.platform() === 'win32' ? '.exe' : '';
 const main = () => main_awaiter(void 0, void 0, void 0, function* () {
     try {
         const installPath = yield install();
