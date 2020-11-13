@@ -4968,6 +4968,7 @@ var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _argume
 
 
 
+const firstChild = (dir) => external_fs_.readdirSync(dir)[0];
 const linux = () => __awaiter(void 0, void 0, void 0, function* () {
     const fetchVersion = (retry = 10) => __awaiter(void 0, void 0, void 0, function* () {
         var _a;
@@ -4995,7 +4996,7 @@ const linux = () => __awaiter(void 0, void 0, void 0, function* () {
     const downloadPath = yield tool_cache.downloadTool('https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz');
     core.info(`Extracting ffmpeg from ${downloadPath}`);
     const extractPath = yield tool_cache.extractTar(downloadPath, void 0, ['-x']);
-    const sourceDir = external_path_.join(extractPath, external_fs_.readdirSync(extractPath)[0]);
+    const sourceDir = external_path_.join(extractPath, firstChild(extractPath));
     core.info(`Caching ffmpeg from ${sourceDir}`);
     const cachedPath = yield tool_cache.cacheDir(sourceDir, 'ffmpeg', version);
     core.info(`Cached ffmpeg to ${cachedPath}`);
@@ -5027,7 +5028,7 @@ const windows = () => __awaiter(void 0, void 0, void 0, function* () {
     const downloadPath = yield tool_cache.downloadTool('https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full.7z');
     core.info(`Extracting ffmpeg from ${downloadPath}`);
     const extractPath = yield tool_cache.extract7z(downloadPath);
-    const sourceDir = external_path_.join(extractPath, 'bin');
+    const sourceDir = external_path_.join(extractPath, firstChild(extractPath), 'bin');
     core.info(`Caching ffmpeg from ${sourceDir}`);
     const cachedPath = yield tool_cache.cacheDir(sourceDir, 'ffmpeg', version);
     core.info(`Cached ffmpeg to ${cachedPath}`);
