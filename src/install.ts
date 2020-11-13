@@ -26,9 +26,8 @@ const fetch = async (url: string): Promise<string> => {
     return await response.readBody();
   }, (err: Error) => {
     core.info(err.message);
-    if (err instanceof tc.HTTPError || (err as any).code === 'ETIMEDOUT')
-      return true;
-    return false;
+    const errorCode = (err as any).code;
+    return err instanceof tc.HTTPError || errorCode === 'ETIMEDOUT' || errorCode === 'ECONNREFUSED';
   });
 };
 
