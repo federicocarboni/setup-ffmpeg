@@ -49,7 +49,7 @@ const windows = async () => {
       });
       const response = await client.get('https://www.gyan.dev/ffmpeg/builds/release-version');
       const body = await response.readBody();
-      const version = body.trim();
+      const [version] = body.trim().split('-');
       assert.ok(version);
       return version;
     } finally {
