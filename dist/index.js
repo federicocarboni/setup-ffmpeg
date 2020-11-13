@@ -4951,6 +4951,8 @@ var external_fs_ = __webpack_require__(747);
 var http_client = __webpack_require__(925);
 // EXTERNAL MODULE: ./node_modules/@actions/tool-cache/lib/tool-cache.js
 var tool_cache = __webpack_require__(784);
+// EXTERNAL MODULE: ./node_modules/@actions/tool-cache/lib/retry-helper.js
+var retry_helper = __webpack_require__(279);
 // CONCATENATED MODULE: ./src/install.ts
 var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -4968,31 +4970,32 @@ var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _argume
 
 
 
+
+const userAgent = 'FedericoCarboni/setup-ffmpeg';
 const firstChild = (dir) => external_fs_.readdirSync(dir)[0];
-const linux = () => __awaiter(void 0, void 0, void 0, function* () {
-    const fetchVersion = (retry = 40) => __awaiter(void 0, void 0, void 0, function* () {
-        var _a;
-        try {
-            const client = new http_client.HttpClient('FedericoCarboni/setup-ffmpeg', [], {
-                socketTimeout: 1000,
-            });
-            const response = yield client.get('https://johnvansickle.com/ffmpeg/release-readme.txt');
-            const readme = yield response.readBody();
-            const [, version] = (_a = /version: (.*?)\n/.exec(readme)) !== null && _a !== void 0 ? _a : [];
-            external_assert_.ok(version);
-            return version;
-        }
-        finally {
-            core.info('Failed to fetch latest version...');
-            if (retry) {
-                core.info('Retrying in 1 second...');
-                yield new Promise((resolve) => setTimeout(resolve, 1000));
-                return yield fetchVersion(retry - 1);
-            }
-        }
+const fetch = (url) => __awaiter(void 0, void 0, void 0, function* () {
+    const retryHelper = new retry_helper.RetryHelper(3, 10, 20);
+    return retryHelper.execute(() => __awaiter(void 0, void 0, void 0, function* () {
+        const http = new http_client.HttpClient(userAgent, [], {
+            allowRetries: false,
+        });
+        const response = yield http.get(url);
+        if (response.message.statusCode !== 200)
+            throw new tool_cache.HTTPError(response.message.statusCode);
+        return yield response.readBody();
+    }), (err) => {
+        core.info(err.message);
+        if (err instanceof tool_cache.HTTPError)
+            return true;
+        return false;
     });
+});
+const linux = () => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     core.info('Fetching version...');
-    const version = yield fetchVersion();
+    const info = yield fetch('https://johnvansickle.com/ffmpeg/release-readme.txt');
+    const [, version] = (_a = /version: (.*?)\n/.exec(info)) !== null && _a !== void 0 ? _a : [];
+    external_assert_.ok(version);
     core.info(`Downloading ffmpeg v${version}`);
     const downloadPath = yield tool_cache.downloadTool('https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz');
     core.info(`Extracting ffmpeg from ${downloadPath}`);
@@ -5004,27 +5007,9 @@ const linux = () => __awaiter(void 0, void 0, void 0, function* () {
     return cachedPath;
 });
 const windows = () => __awaiter(void 0, void 0, void 0, function* () {
-    const fetchVersion = (retry = 40) => __awaiter(void 0, void 0, void 0, function* () {
-        try {
-            const client = new http_client.HttpClient('FedericoCarboni/setup-ffmpeg', [], {
-                socketTimeout: 1000,
-            });
-            const response = yield client.get('https://www.gyan.dev/ffmpeg/builds/release-version');
-            const body = yield response.readBody();
-            const [version] = body.trim().split('-');
-            external_assert_.ok(version);
-            return version;
-        }
-        finally {
-            core.info('Failed to fetch latest version...');
-            if (retry) {
-                core.info('Retrying...');
-                return yield fetchVersion(retry - 1);
-            }
-        }
-    });
     core.info('Fetching version...');
-    const version = yield fetchVersion();
+    const info = yield fetch('https://www.gyan.dev/ffmpeg/builds/release-version');
+    const [version] = info.trim().split('-');
     core.info(`Downloading ffmpeg v${version}`);
     const downloadPath = yield tool_cache.downloadTool('https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full.7z');
     core.info(`Extracting ffmpeg from ${downloadPath}`);
