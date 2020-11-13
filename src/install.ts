@@ -16,6 +16,7 @@ const fetch = async (url: string): Promise<string> => {
   return retryHelper.execute(async () => {
     const http = new hc.HttpClient(userAgent, [], {
       allowRetries: false,
+      socketTimeout: 10000,
     });
     const response = await http.get(url);
     if (response.message.statusCode !== 200)
