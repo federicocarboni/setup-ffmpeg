@@ -4982,6 +4982,7 @@ const fetch = (url) => __awaiter(void 0, void 0, void 0, function* () {
             socketTimeout: 1000,
         });
         const response = yield http.get(url);
+        core.info('fetched response');
         if (response.message.statusCode !== 200)
             throw new tool_cache.HTTPError(response.message.statusCode);
         return yield response.readBody();
