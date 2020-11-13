@@ -20,6 +20,7 @@ const fetch = async (url: string): Promise<string> => {
       socketTimeout: 1000,
     });
     const response = await http.get(url);
+    core.info('fetched response');
     if (response.message.statusCode !== 200)
       throw new tc.HTTPError(response.message.statusCode);
     return await response.readBody();
