@@ -13,7 +13,7 @@ const linux = async () => {
   const fetchVersion = async (retry = 10): Promise<string> => {
     try {
       const client = new hc.HttpClient('FedericoCarboni/setup-ffmpeg', [], {
-        socketTimeout: 100,
+        socketTimeout: 1000,
       });
       const response = await client.get('https://johnvansickle.com/ffmpeg/release-readme.txt');
       const readme = await response.readBody();
