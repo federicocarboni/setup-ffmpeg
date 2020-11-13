@@ -24,9 +24,9 @@ const fetch = async (url: string): Promise<string> => {
     if (response.message.statusCode !== 200)
       throw new tc.HTTPError(response.message.statusCode);
     return await response.readBody();
-  }, (err) => {
+  }, (err: Error) => {
     core.info(err.message);
-    if (err instanceof tc.HTTPError)
+    if (err instanceof tc.HTTPError || (err as any).code === 'ETIMEDOUT')
       return true;
     return false;
   });
