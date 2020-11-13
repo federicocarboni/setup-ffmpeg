@@ -5010,7 +5010,7 @@ const windows = () => __awaiter(void 0, void 0, void 0, function* () {
             });
             const response = yield client.get('https://www.gyan.dev/ffmpeg/builds/release-version');
             const body = yield response.readBody();
-            const version = body.trim();
+            const [version] = body.trim().split('-');
             external_assert_.ok(version);
             return version;
         }
