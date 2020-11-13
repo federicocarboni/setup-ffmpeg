@@ -10,7 +10,7 @@ import * as tc from '@actions/tool-cache';
 const firstChild = (dir: string) => fs.readdirSync(dir)[0];
 
 const linux = async () => {
-  const fetchVersion = async (retry = 10): Promise<string> => {
+  const fetchVersion = async (retry = 40): Promise<string> => {
     try {
       const client = new hc.HttpClient('FedericoCarboni/setup-ffmpeg', [], {
         socketTimeout: 1000,
@@ -43,7 +43,7 @@ const linux = async () => {
 };
 
 const windows = async () => {
-  const fetchVersion = async (retry = 10): Promise<string> => {
+  const fetchVersion = async (retry = 40): Promise<string> => {
     try {
       const client = new hc.HttpClient('FedericoCarboni/setup-ffmpeg', [], {
         socketTimeout: 1000,
