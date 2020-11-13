@@ -4988,9 +4988,8 @@ const fetch = (url) => __awaiter(void 0, void 0, void 0, function* () {
         return yield response.readBody();
     }), (err) => {
         core.info(err.message);
-        if (err instanceof tool_cache.HTTPError || err.code === 'ETIMEDOUT')
-            return true;
-        return false;
+        const errorCode = err.code;
+        return err instanceof tool_cache.HTTPError || errorCode === 'ETIMEDOUT' || errorCode === 'ECONNREFUSED';
     });
 });
 const linux = () => __awaiter(void 0, void 0, void 0, function* () {
