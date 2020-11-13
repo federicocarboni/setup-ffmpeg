@@ -4985,7 +4985,8 @@ const linux = () => __awaiter(void 0, void 0, void 0, function* () {
         finally {
             core.info('Failed to fetch latest version...');
             if (retry) {
-                core.info('Retrying...');
+                core.info('Retrying in 1 second...');
+                yield new Promise((resolve) => setTimeout(resolve, 1000));
                 return yield fetchVersion(retry - 1);
             }
         }
