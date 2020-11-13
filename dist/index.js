@@ -5001,6 +5001,38 @@ const linux = () => __awaiter(void 0, void 0, void 0, function* () {
     core.info(`Cached ffmpeg to ${cachedPath}`);
     return cachedPath;
 });
+const windows = () => __awaiter(void 0, void 0, void 0, function* () {
+    const fetchVersion = (retry = 10) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const client = new http_client.HttpClient('FedericoCarboni/setup-ffmpeg', [], {
+                socketTimeout: 100,
+            });
+            const response = yield client.get('https://www.gyan.dev/ffmpeg/builds/release-version');
+            const body = yield response.readBody();
+            const version = body.trim();
+            external_assert_.ok(version);
+            return version;
+        }
+        finally {
+            core.info('Failed to fetch latest version...');
+            if (retry) {
+                core.info('Retrying...');
+                return yield fetchVersion(retry - 1);
+            }
+        }
+    });
+    core.info('Fetching version...');
+    const version = yield fetchVersion();
+    core.info(`Downloading ffmpeg v${version}`);
+    const downloadPath = yield tool_cache.downloadTool('https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full.7z');
+    core.info(`Extracting ffmpeg from ${downloadPath}`);
+    const extractPath = yield tool_cache.extract7z(downloadPath);
+    const sourceDir = external_path_.join(extractPath, 'bin');
+    core.info(`Caching ffmpeg from ${sourceDir}`);
+    const cachedPath = yield tool_cache.cacheDir(sourceDir, 'ffmpeg', version);
+    core.info(`Cached ffmpeg to ${cachedPath}`);
+    return cachedPath;
+});
 const install = () => __awaiter(void 0, void 0, void 0, function* () {
     // TODO: support 32-bit
     external_assert_.strictEqual(external_os_.arch(), 'x64');
@@ -5013,6 +5045,8 @@ const install = () => __awaiter(void 0, void 0, void 0, function* () {
     switch (external_os_.platform()) {
         case 'linux':
             return yield linux();
+        case 'win32':
+            return yield windows();
         default:
             throw new Error(); // TODO: add an error message
     }
