@@ -4976,6 +4976,7 @@ const firstChild = (dir) => external_fs_.readdirSync(dir)[0];
 const fetch = (url) => __awaiter(void 0, void 0, void 0, function* () {
     const retryHelper = new retry_helper.RetryHelper(3, 10, 20);
     return retryHelper.execute(() => __awaiter(void 0, void 0, void 0, function* () {
+        core.info(`fetching information from ${url}`);
         const http = new http_client.HttpClient(userAgent, [], {
             allowRetries: false,
             socketTimeout: 10000,
