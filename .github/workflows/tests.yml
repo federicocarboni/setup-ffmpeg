@@ -13,14 +13,15 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
 
     steps:
       - uses: actions/checkout@v2
-      - name: FedericoCarboni/setup-ffmpeg
+      - name: Run FedericoCarboni/setup-ffmpeg
         uses: ./
-      - name: FedericoCarboni/setup-ffmpeg
+      - name: Run FedericoCarboni/setup-ffmpeg
         id: setup-ffmpeg
         uses: ./
       - run: echo ${{ steps.setup-ffmpeg.outputs.ffmpeg-path }} ${{ steps.setup-ffmpeg.outputs.ffprobe-path }}
