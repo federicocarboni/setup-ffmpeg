@@ -4985,7 +4985,8 @@ const linux = () => __awaiter(void 0, void 0, void 0, function* () {
         finally {
             core.info('Failed to fetch latest version...');
             if (retry) {
-                core.info('Retrying...');
+                core.info('Retrying in 10 seconds...');
+                yield new Promise((resolve) => setTimeout(resolve, 10000));
                 return yield fetchVersion(retry - 1);
             }
         }
@@ -5048,6 +5049,8 @@ const install = () => __awaiter(void 0, void 0, void 0, function* () {
             return yield linux();
         case 'win32':
             return yield windows();
+        // TODO: support macos
+        case 'darwin':
         default:
             throw new Error(); // TODO: add an error message
     }
