@@ -14,6 +14,7 @@ const firstChild = (dir: string) => fs.readdirSync(dir)[0];
 const fetch = async (url: string): Promise<string> => {
   const retryHelper = new rh.RetryHelper(3, 10, 20);
   return retryHelper.execute(async () => {
+    core.info(`fetching information from ${url}`);
     const http = new hc.HttpClient(userAgent, [], {
       allowRetries: false,
       socketTimeout: 10000,
