@@ -1,10 +1,7 @@
 import * as path from 'path';
-import * as os from 'os';
 
 import * as core from '@actions/core';
-import { install } from './install';
-
-const EXE_EXT = os.platform() === 'win32' ? '.exe' : '';
+import { EXE_EXT, install } from './install';
 
 const main = async () => {
   try {
