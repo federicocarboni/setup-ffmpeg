@@ -4974,7 +4974,7 @@ const linux = () => __awaiter(void 0, void 0, void 0, function* () {
         var _a;
         try {
             const client = new http_client.HttpClient('FedericoCarboni/setup-ffmpeg', [], {
-                socketTimeout: 100,
+                socketTimeout: 1000,
             });
             const response = yield client.get('https://johnvansickle.com/ffmpeg/release-readme.txt');
             const readme = yield response.readBody();
