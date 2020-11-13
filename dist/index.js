@@ -5006,7 +5006,7 @@ const windows = () => __awaiter(void 0, void 0, void 0, function* () {
     const fetchVersion = (retry = 10) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const client = new http_client.HttpClient('FedericoCarboni/setup-ffmpeg', [], {
-                socketTimeout: 100,
+                socketTimeout: 1000,
             });
             const response = yield client.get('https://www.gyan.dev/ffmpeg/builds/release-version');
             const body = yield response.readBody();
