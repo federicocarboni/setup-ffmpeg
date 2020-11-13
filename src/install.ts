@@ -23,8 +23,7 @@ const linux = async () => {
     } finally {
       core.info('Failed to fetch latest version...');
       if (retry) {
-        core.info('Retrying in 10 seconds...');
-        await new Promise((resolve) => setTimeout(resolve, 10000));
+        core.info('Retrying...');
         return await fetchVersion(retry - 1);
       }
     }
@@ -56,7 +55,7 @@ const windows = async () => {
     } finally {
       core.info('Failed to fetch latest version...');
       if (retry) {
-        core.info('Retrying...')
+        core.info('Retrying...');
         return await fetchVersion(retry - 1);
       }
     }
