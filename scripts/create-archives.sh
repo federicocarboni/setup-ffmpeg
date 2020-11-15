@@ -5,7 +5,7 @@ linux_version=`curl -L https://johnvansickle.com/ffmpeg/release-readme.txt | gre
 win32_version=`curl -L https://www.gyan.dev/ffmpeg/builds/release-version | cut -d "-" -f 1`
 
 # Make sure that the versions are the same
-if [[ "$linux_version" != "$win32_version" ]]; then
+if [ "$linux_version" != "$win32_version" ]; then
   echo "$linux_version != $win32_version"
   exit 1
 fi
@@ -31,12 +31,12 @@ win32_archive="$win32_name.tar.gz"
 # darwin_temp=''
 # darwin_archive=''
 
-function download {
+download() {
   echo "setup-ffmpeg: downloading $1 to $2"
   curl -L $1 -o $2
 }
 
-function create_archive {
+create_archive() {
   echo "setup-ffmpeg: creating archive $1 from $2"
   curdir=$PWD
   cd $2
@@ -44,17 +44,17 @@ function create_archive {
   cd $curdir
 }
 
-function tar_extract {
+tar_extract() {
   echo "setup-ffmpeg: extracting $2 from $1 to $3"
   tar -xf $1 --wildcards -O $2 > $3
 }
 
-function remove {
+remove() {
   echo "setup-ffmpeg: removing $1"
   rm -rf $1
 }
 
-function create_linux_archive {
+create_linux_archive() {
   echo 'setup-ffmpeg: creating linux archive'
 
   download $linux_url $linux_temp_archive || exit 1
@@ -75,7 +75,7 @@ function create_linux_archive {
   echo 'setup-ffmpeg: linux archive created successfully'
 }
 
-function create_win32_archive {
+create_win32_archive() {
   echo 'setup-ffmpeg: creating win32 archive'
 
   download $win32_url $win32_temp_archive || exit 1
@@ -93,7 +93,7 @@ function create_win32_archive {
   echo 'setup-ffmpeg: win32 archive created successfully'
 }
 
-function create_darwin_archive {
+create_darwin_archive() {
   echo 'setup-ffmpeg: darwin is not yet supported'
 }
 
