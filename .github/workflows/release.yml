@@ -12,7 +12,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - run: sudo source ./scripts/create-archives.sh
+      - run: sudo ./scripts/create-archives.sh
         id: create-archives
       - uses: actions/create-release@v1
         id: create-release
