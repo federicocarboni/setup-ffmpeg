@@ -4977,7 +4977,7 @@ var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _argume
 const userAgent = 'FedericoCarboni/setup-ffmpeg';
 const firstChild = (dir) => external_fs_.readdirSync(dir)[0];
 const fetch = (url) => __awaiter(void 0, void 0, void 0, function* () {
-    const retryHelper = new retry_helper.RetryHelper(3, 10, 20);
+    const retryHelper = new retry_helper.RetryHelper(12, 10, 20);
     return retryHelper.execute(() => __awaiter(void 0, void 0, void 0, function* () {
         core.info(`fetching ${url}`);
         const http = new http_client.HttpClient(userAgent, [], {
