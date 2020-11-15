@@ -1,15 +1,13 @@
-import * as path from 'path';
-
 import * as core from '@actions/core';
-import { EXE_EXT, install } from './install';
+import { install } from './install';
 
 const main = async () => {
   try {
-    const installPath = await install();
-    core.addPath(installPath);
-    core.setOutput('path', installPath);
-    core.setOutput('ffmpeg-path', path.join(installPath, `ffmpeg${EXE_EXT}`));
-    core.setOutput('ffprobe-path', path.join(installPath, `ffprobe${EXE_EXT}`));
+    const { path, ffmpegPath, ffprobePath } = await install();
+    core.addPath(path);
+    core.setOutput('path', path);
+    core.setOutput('ffmpeg-path', ffmpegPath);
+    core.setOutput('ffprobe-path', ffprobePath);
   } catch (error) {
     core.setFailed(error);
   }

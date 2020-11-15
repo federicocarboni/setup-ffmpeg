@@ -1,11 +1,10 @@
 {
   "name": "setup-ffmpeg",
-  "version": "1.0.0",
-  "description": "",
-  "main": "action.js",
+  "version": "1.0.0-alpha.0",
+  "private": true,
+  "description": "Setup FFmpeg in GitHub Actions",
   "scripts": {
-    "build": "ncc build src/main.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "ncc build src/main.ts"
   },
   "repository": {
     "type": "git",

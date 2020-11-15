@@ -4930,31 +4930,31 @@ module.exports = v4;
 
 /***/ }),
 
-/***/ 955:
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ 649:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
-// ESM COMPAT FLAG
-__webpack_require__.r(__webpack_exports__);
 
-// EXTERNAL MODULE: external "path"
-var external_path_ = __webpack_require__(622);
-// EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
-var core = __webpack_require__(186);
-// EXTERNAL MODULE: external "assert"
-var external_assert_ = __webpack_require__(357);
-// EXTERNAL MODULE: external "fs"
-var external_fs_ = __webpack_require__(747);
-// EXTERNAL MODULE: external "os"
-var external_os_ = __webpack_require__(87);
-// EXTERNAL MODULE: ./node_modules/@actions/exec/lib/exec.js
-var exec = __webpack_require__(514);
-// EXTERNAL MODULE: ./node_modules/@actions/http-client/index.js
-var http_client = __webpack_require__(925);
-// EXTERNAL MODULE: ./node_modules/@actions/tool-cache/lib/tool-cache.js
-var tool_cache = __webpack_require__(784);
-// CONCATENATED MODULE: ./src/install.ts
-var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -4963,48 +4963,78 @@ var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _argume
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-
-
-
-
-
-
-
-
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.install = void 0;
+const assert = __importStar(__webpack_require__(357));
+const path = __importStar(__webpack_require__(622));
+const fs = __importStar(__webpack_require__(747));
+const os = __importStar(__webpack_require__(87));
+const exec = __importStar(__webpack_require__(514));
+const hc = __importStar(__webpack_require__(925));
+const tc = __importStar(__webpack_require__(784));
 const userAgent = 'FedericoCarboni/setup-ffmpeg';
+const ext = os.platform() === 'win32' ? '.exe' : '';
+const getExePath = (dir, filename) => path.join(dir, filename + ext);
+const chmodX = (filename) => fs.promises.chmod(filename, '755');
 const fetchVersion = () => __awaiter(void 0, void 0, void 0, function* () {
-    const http = new http_client.HttpClient(userAgent);
-    const release = (yield http.getJson('https://api.github.com/repos/FedericoCarboni/setup-ffmpeg/releases/latest')).result;
+    const http = new hc.HttpClient(userAgent);
+    const response = yield http.getJson('https://api.github.com/repos/FedericoCarboni/setup-ffmpeg/releases/latest');
+    assert.ok(response.statusCode === 200);
+    const release = response.result;
     const version = release === null || release === void 0 ? void 0 : release.tag_name;
-    external_assert_.ok(version);
+    assert.ok(version);
     return version;
 });
-const testInstallation = (installPath) => __awaiter(void 0, void 0, void 0, function* () {
-    core.info('testing installation');
-    external_assert_.ok(external_fs_.lstatSync(external_path_.join(installPath, `ffmpeg${EXE_EXT}`)));
-    external_assert_.ok((yield exec.exec(external_path_.join(installPath, `ffmpeg${EXE_EXT}`), ['-version'])) === 0, 'Expected ffmpeg to exit with code 0');
-    external_assert_.ok((yield exec.exec(external_path_.join(installPath, `ffprobe${EXE_EXT}`), ['-version'])) === 0, 'Expected ffprobe to exit with code 0');
-    core.info('installation successful');
+const testInstallation = (ffmpegPath, ffprobePath) => __awaiter(void 0, void 0, void 0, function* () {
+    assert.ok((yield exec.exec(ffmpegPath, ['-version'])) === 0, 'Expected ffmpeg to exit with code 0');
+    assert.ok((yield exec.exec(ffprobePath, ['-version'])) === 0, 'Expected ffprobe to exit with code 0');
 });
-const EXE_EXT = external_os_.platform() === 'win32' ? '.exe' : '';
-const install = () => __awaiter(void 0, void 0, void 0, function* () {
-    // TODO: support 32-bit
-    external_assert_.strictEqual(external_os_.arch(), 'x64');
-    const path = tool_cache.find('ffmpeg', '4.x');
-    if (path) {
-        core.info(`found cached installation ${path}`);
-        return path;
-    }
+exports.install = () => __awaiter(void 0, void 0, void 0, function* () {
+    assert.strictEqual(os.arch(), 'x64');
+    assert.ok(os.platform() === 'linux' || os.platform() === 'win32');
     const version = yield fetchVersion();
-    const downloadPath = yield tool_cache.downloadTool(`https://github.com/FedericoCarboni/setup-ffmpeg/releases/download/4.3.1/ffmpeg-${external_os_.platform()}-${external_os_.arch()}.tar.gz`);
-    const extractPath = yield tool_cache.extractTar(downloadPath);
-    const installPath = yield tool_cache.cacheDir(extractPath, 'ffmpeg', version, external_os_.arch());
-    yield testInstallation(installPath);
-    return installPath;
+    let path = tc.find('ffmpeg', version);
+    if (!path) {
+        const downloadPath = yield tc.downloadTool(`https://github.com/FedericoCarboni/setup-ffmpeg/releases/download/4.3.1/ffmpeg-${os.platform()}-${os.arch()}.tar.gz`);
+        const extractPath = yield tc.extractTar(downloadPath);
+        path = yield tc.cacheDir(extractPath, 'ffmpeg', version, os.arch());
+    }
+    const ffmpegPath = getExePath(path, 'ffmpeg');
+    const ffprobePath = getExePath(path, 'ffprobe');
+    yield chmodX(ffmpegPath);
+    yield chmodX(ffprobePath);
+    yield testInstallation(ffmpegPath, ffprobePath);
+    return { path, ffmpegPath, ffprobePath };
 });
 
-// CONCATENATED MODULE: ./src/main.ts
-var main_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
+
+/***/ }),
+
+/***/ 399:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -5013,16 +5043,16 @@ var main_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arg
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-
-
-
-const main = () => main_awaiter(void 0, void 0, void 0, function* () {
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const core = __importStar(__webpack_require__(186));
+const install_1 = __webpack_require__(649);
+const main = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const installPath = yield install();
-        core.addPath(installPath);
-        core.setOutput('path', installPath);
-        core.setOutput('ffmpeg-path', external_path_.join(installPath, `ffmpeg${EXE_EXT}`));
-        core.setOutput('ffprobe-path', external_path_.join(installPath, `ffprobe${EXE_EXT}`));
+        const { path, ffmpegPath, ffprobePath } = yield install_1.install();
+        core.addPath(path);
+        core.setOutput('path', path);
+        core.setOutput('ffmpeg-path', ffmpegPath);
+        core.setOutput('ffprobe-path', ffprobePath);
     }
     catch (error) {
         core.setFailed(error);
@@ -5169,23 +5199,12 @@ module.exports = require("util");;
 /******/ 	}
 /******/ 	
 /************************************************************************/
-/******/ 	/* webpack/runtime/make namespace object */
-/******/ 	(() => {
-/******/ 		// define __esModule on exports
-/******/ 		__webpack_require__.r = (exports) => {
-/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
-/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
-/******/ 			}
-/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
-/******/ 		};
-/******/ 	})();
-/******/ 	
 /******/ 	/* webpack/runtime/compat */
 /******/ 	
 /******/ 	__webpack_require__.ab = __dirname + "/";/************************************************************************/
 /******/ 	// module exports must be returned from runtime so entry inlining is disabled
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(955);
+/******/ 	return __webpack_require__(399);
 /******/ })()
 ;

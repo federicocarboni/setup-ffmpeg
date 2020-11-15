@@ -11,7 +11,7 @@ on:
 jobs:
   test:
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 8
+    timeout-minutes: 2
 
     strategy:
       fail-fast: false
@@ -25,6 +25,5 @@ jobs:
       - name: Run FedericoCarboni/setup-ffmpeg
         id: setup-ffmpeg
         uses: ./
-      - run: echo ${{ steps.setup-ffmpeg.outputs.ffmpeg-path }} ${{ steps.setup-ffmpeg.outputs.ffprobe-path }}
       - run: ffmpeg -version
       - run: ffprobe -version
