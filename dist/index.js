@@ -4981,7 +4981,6 @@ const fetchVersion = () => __awaiter(void 0, void 0, void 0, function* () {
 });
 const testInstallation = (installPath) => __awaiter(void 0, void 0, void 0, function* () {
     core.info('testing installation');
-    console.log(external_fs_.lstatSync(external_path_.join(installPath, `ffmpeg${EXE_EXT}`)));
     external_assert_.ok((yield exec.exec(external_path_.join(installPath, `ffmpeg${EXE_EXT}`), ['-version'])) === 0, 'Expected ffmpeg to exit with code 0');
     external_assert_.ok((yield exec.exec(external_path_.join(installPath, `ffprobe${EXE_EXT}`), ['-version'])) === 0, 'Expected ffprobe to exit with code 0');
     core.info('installation successful');
@@ -4990,15 +4989,17 @@ const EXE_EXT = external_os_.platform() === 'win32' ? '.exe' : '';
 const install = () => __awaiter(void 0, void 0, void 0, function* () {
     // TODO: support 32-bit
     external_assert_.strictEqual(external_os_.arch(), 'x64');
-    const path = tool_cache.find('ffmpeg', '4.x');
-    if (path) {
-        core.info(`found cached installation ${path}`);
-        return path;
+    let installPath = tool_cache.find('ffmpeg', '4.x');
+    if (installPath) {
+        core.info(`found cached installation ${installPath}`);
+        return installPath;
     }
     const version = yield fetchVersion();
     const downloadPath = yield tool_cache.downloadTool(`https://github.com/FedericoCarboni/setup-ffmpeg/releases/download/4.3.1/ffmpeg-${external_os_.platform()}-${external_os_.arch()}.tar.gz`);
     const extractPath = yield tool_cache.extractTar(downloadPath);
-    const installPath = yield tool_cache.cacheDir(extractPath, 'ffmpeg', version, external_os_.arch());
+    installPath = yield tool_cache.cacheDir(extractPath, 'ffmpeg', version, external_os_.arch());
+    yield external_fs_.promises.chmod(external_path_.join(installPath, `ffmpeg${EXE_EXT}`), '755');
+    yield external_fs_.promises.chmod(external_path_.join(installPath, `ffprobe${EXE_EXT}`), '755');
     yield testInstallation(installPath);
     return installPath;
 });
