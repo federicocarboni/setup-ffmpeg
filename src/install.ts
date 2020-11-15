@@ -21,7 +21,7 @@ const fetchVersion = async (): Promise<string> => {
 
 const testInstallation = async (installPath: string) => {
   core.info('testing installation');
-  assert.ok(fs.lstatSync(path.join(installPath, `ffmpeg${EXE_EXT}`)));
+  console.log(fs.lstatSync(path.join(installPath, `ffmpeg${EXE_EXT}`)));
   assert.ok(await exec.exec(path.join(installPath, `ffmpeg${EXE_EXT}`), ['-version']) === 0, 'Expected ffmpeg to exit with code 0');
   assert.ok(await exec.exec(path.join(installPath, `ffprobe${EXE_EXT}`), ['-version']) === 0, 'Expected ffprobe to exit with code 0');
   core.info('installation successful');
