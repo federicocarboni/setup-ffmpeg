@@ -4943,6 +4943,8 @@ var external_path_ = __webpack_require__(622);
 var core = __webpack_require__(186);
 // EXTERNAL MODULE: external "assert"
 var external_assert_ = __webpack_require__(357);
+// EXTERNAL MODULE: external "fs"
+var external_fs_ = __webpack_require__(747);
 // EXTERNAL MODULE: external "os"
 var external_os_ = __webpack_require__(87);
 // EXTERNAL MODULE: ./node_modules/@actions/exec/lib/exec.js
@@ -4968,6 +4970,7 @@ var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _argume
 
 
 
+
 const userAgent = 'FedericoCarboni/setup-ffmpeg';
 const fetchVersion = () => __awaiter(void 0, void 0, void 0, function* () {
     const http = new http_client.HttpClient(userAgent);
@@ -4978,6 +4981,7 @@ const fetchVersion = () => __awaiter(void 0, void 0, void 0, function* () {
 });
 const testInstallation = (installPath) => __awaiter(void 0, void 0, void 0, function* () {
     core.info('testing installation');
+    external_assert_.ok(external_fs_.lstatSync(external_path_.join(installPath, `ffmpeg${EXE_EXT}`)));
     external_assert_.ok((yield exec.exec(external_path_.join(installPath, `ffmpeg${EXE_EXT}`), ['-version'])) === 0, 'Expected ffmpeg to exit with code 0');
     external_assert_.ok((yield exec.exec(external_path_.join(installPath, `ffprobe${EXE_EXT}`), ['-version'])) === 0, 'Expected ffprobe to exit with code 0');
     core.info('installation successful');
