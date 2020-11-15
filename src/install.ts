@@ -5,7 +5,6 @@ import * as os from 'os';
 
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
-import * as io from '@actions/io';
 import * as hc from '@actions/http-client';
 import * as tc from '@actions/tool-cache';
 
