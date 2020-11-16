@@ -1,38 +1,41 @@
 name: Release Builds
 
 on:
+  push:
+    paths:
+      - '**/builds.yml'
+      - '**/download-builds.sh'
   schedule:
-    # Run on every Sunday at 00:00
-    - cron: 0 0 * * 0
+    - cron: '0 0 * * 1'
 
 jobs:
-  release:
+  release-builds:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v2
-      - run: sudo sh ./scripts/create-archives.sh
-        id: create-archives
+      - run: sudo sh ./scripts/download-builds.sh
+        id: builds
       - uses: actions/create-release@v1
         id: create-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.create-archives.outputs.version }}
-          release_name: ${{ steps.create-archives.outputs.version }}
+          tag_name: ffmpeg-${{ steps.builds.outputs.version }}
+          release_name: FFmpeg Build v${{ steps.builds.outputs.version }}
       - uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create-release.outputs.upload_url }}
-          asset_path: ${{ steps.create-archives.outputs.linux-path }}
-          asset_name: ${{ steps.create-archives.outputs.linux-path }}
+          asset_path: ${{ steps.builds.outputs.linux-path }}
+          asset_name: ${{ steps.builds.outputs.linux-path }}
           asset_content_type: application/octet-stream
       - uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create-release.outputs.upload_url }}
-          asset_path: ${{ steps.create-archives.outputs.win32-path }}
-          asset_name: ${{ steps.create-archives.outputs.win32-path }}
+          asset_path: ${{ steps.builds.outputs.win32-path }}
+          asset_name: ${{ steps.builds.outputs.win32-path }}
           asset_content_type: application/octet-stream

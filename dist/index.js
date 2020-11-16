@@ -4930,86 +4930,6 @@ module.exports = v4;
 
 /***/ }),
 
-/***/ 649:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.install = void 0;
-const assert = __importStar(__webpack_require__(357));
-const path = __importStar(__webpack_require__(622));
-const fs = __importStar(__webpack_require__(747));
-const os = __importStar(__webpack_require__(87));
-const exec = __importStar(__webpack_require__(514));
-const hc = __importStar(__webpack_require__(925));
-const tc = __importStar(__webpack_require__(784));
-const userAgent = 'FedericoCarboni/setup-ffmpeg';
-const ext = os.platform() === 'win32' ? '.exe' : '';
-const getExePath = (dir, filename) => path.join(dir, filename + ext);
-const chmodX = (filename) => fs.promises.chmod(filename, '755');
-const fetchVersion = () => __awaiter(void 0, void 0, void 0, function* () {
-    const http = new hc.HttpClient(userAgent);
-    const response = yield http.getJson('https://api.github.com/repos/FedericoCarboni/setup-ffmpeg/releases/latest');
-    assert.ok(response.statusCode === 200);
-    const release = response.result;
-    const version = release === null || release === void 0 ? void 0 : release.tag_name;
-    assert.ok(version);
-    return version;
-});
-const testInstallation = (ffmpegPath, ffprobePath) => __awaiter(void 0, void 0, void 0, function* () {
-    assert.ok((yield exec.exec(ffmpegPath, ['-version'])) === 0, 'Expected ffmpeg to exit with code 0');
-    assert.ok((yield exec.exec(ffprobePath, ['-version'])) === 0, 'Expected ffprobe to exit with code 0');
-});
-exports.install = () => __awaiter(void 0, void 0, void 0, function* () {
-    assert.strictEqual(os.arch(), 'x64');
-    assert.ok(os.platform() === 'linux' || os.platform() === 'win32');
-    const version = yield fetchVersion();
-    let path = tc.find('ffmpeg', version);
-    if (!path) {
-        const downloadPath = yield tc.downloadTool(`https://github.com/FedericoCarboni/setup-ffmpeg/releases/download/4.3.1/ffmpeg-${os.platform()}-${os.arch()}.tar.gz`);
-        const extractPath = yield tc.extractTar(downloadPath);
-        path = yield tc.cacheDir(extractPath, 'ffmpeg', version, os.arch());
-    }
-    const ffmpegPath = getExePath(path, 'ffmpeg');
-    const ffprobePath = getExePath(path, 'ffprobe');
-    yield chmodX(ffmpegPath);
-    yield chmodX(ffprobePath);
-    yield testInstallation(ffmpegPath, ffprobePath);
-    return { path, ffmpegPath, ffprobePath };
-});
-
-
-/***/ }),
-
 /***/ 399:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
@@ -5044,20 +4964,64 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+const assert = __importStar(__webpack_require__(357));
+const path = __importStar(__webpack_require__(622));
+const fs = __importStar(__webpack_require__(747));
+const os = __importStar(__webpack_require__(87));
 const core = __importStar(__webpack_require__(186));
-const install_1 = __webpack_require__(649);
-const main = () => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const { path, ffmpegPath, ffprobePath } = yield install_1.install();
-        core.addPath(path);
-        core.setOutput('path', path);
-        core.setOutput('ffmpeg-path', ffmpegPath);
-        core.setOutput('ffprobe-path', ffprobePath);
-    }
-    catch (error) {
-        core.setFailed(error);
-    }
-});
+const hc = __importStar(__webpack_require__(925));
+const tc = __importStar(__webpack_require__(784));
+const exec = __importStar(__webpack_require__(514));
+const GITHUB_REPO = 'FedericoCarboni/setup-ffmpeg';
+const GITHUB_URL = `https://github.com/${GITHUB_REPO}`;
+const PLATFORMS = new Set(['linux', 'win32']);
+// sets the file as executable acts like chmod +x $path
+const chmodx = (path) => fs.promises.chmod(path, '755');
+function main() {
+    var _a, _b;
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const platform = os.platform();
+            const arch = os.arch();
+            // check if the current platform and architecture are supported
+            assert.ok(PLATFORMS.has(platform), `setup-ffmpeg cannot be run on ${platform}`);
+            assert.ok(arch === 'x64', 'setup-ffmpeg can only be run on 64-bit systems');
+            // fetch the latest build of ffmpeg
+            const http = new hc.HttpClient('FedericoCarboni/setup-ffmpeg');
+            const res = yield http.getJson(`https://api.github.com/repos/${GITHUB_REPO}/releases`);
+            assert.ok(res.statusCode === 200);
+            assert.ok(res.result);
+            const version = (_b = (_a = res.result.find(({ tag_name }) => tag_name.startsWith('ffmpeg-'))) === null || _a === void 0 ? void 0 : _a.tag_name) === null || _b === void 0 ? void 0 : _b.slice(7);
+            assert.ok(version);
+            // search in the cache if version is already installed
+            let installPath = tc.find('ffmpeg', version, arch);
+            // if ffmpeg was not found in cache download it from releases
+            if (!installPath) {
+                const downloadURL = `${GITHUB_URL}/releases/download/ffmpeg-${version}/ffmpeg-${platform}-${arch}.tar.gz`;
+                const downloadPath = yield tc.downloadTool(downloadURL);
+                const extractPath = yield tc.extractTar(downloadPath);
+                installPath = yield tc.cacheDir(extractPath, 'ffmpeg', version, arch);
+            }
+            assert.ok(installPath);
+            const ext = platform === 'win32' ? '.exe' : '';
+            const ffmpegPath = path.join(installPath, `ffmpeg${ext}`);
+            const ffprobePath = path.join(installPath, `ffprobe${ext}`);
+            // ensure the correct permission to execute ffmpeg and ffprobe
+            yield chmodx(ffmpegPath);
+            yield chmodx(ffprobePath);
+            // execute ffmpeg -version and ffprobe -version to verify the installation
+            assert.ok((yield exec.exec(ffmpegPath, ['-version'])) === 0);
+            assert.ok((yield exec.exec(ffprobePath, ['-version'])) === 0);
+            core.addPath(installPath);
+            core.setOutput('path', installPath);
+            core.setOutput('ffmpeg-path', ffmpegPath);
+            core.setOutput('ffprobe-path', ffprobePath);
+        }
+        catch (error) {
+            core.setFailed(`${error.message}`);
+        }
+    });
+}
 main();
 
 

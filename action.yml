@@ -1,5 +1,5 @@
 name: Setup FFmpeg
-description: Setup
+description: Setup FFmpeg in GitHub Actions
 
 runs:
   using: node12

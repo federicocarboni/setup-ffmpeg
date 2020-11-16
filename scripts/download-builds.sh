@@ -10,9 +10,6 @@ if [ "$linux_version" != "$win32_version" ]; then
   exit 1
 fi
 
-# Expose the version to the next steps in the workflow
-echo "::set-output name=version::$linux_version"
-
 linux_url='https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz'
 linux_temp_archive='/tmp/ffmpeg-release-amd64-static.tar.xz'
 linux_name='ffmpeg-linux-x64'
@@ -101,6 +98,8 @@ create_linux_archive
 create_win32_archive
 # create_darwin_archive
 
+# Expose the version to the next steps in the workflow
+echo "::set-output name=version::$linux_version"
+# Expose paths to the archives
 echo "::set-output name=linux-path::$linux_archive"
 echo "::set-output name=win32-path::$win32_archive"
-# echo "::set-output name=darwin-path::$darwin_archive"

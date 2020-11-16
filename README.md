@@ -1,12 +1,7 @@
 # setup-ffmpeg
-This action sets up FFmpeg by:
- - downloading and caching the latest FFmpeg release
- - adding `ffmpeg` and `ffprobe` to `PATH` and setting
- - setting `path`, `ffmpeg-path` and `ffprobe-path` in its step's output
+Setup FFmpeg in GitHub Actions to use `ffmpeg` and `ffprobe`.
 
 # Usage
-
-
 
 ```yml
 steps:
@@ -17,6 +12,6 @@ steps:
 ```
 
 # FFmpeg Version
-This action uses the latest FFmpeg releases from the following sources:
- - on linux https://johnvansickle.com/ffmpeg/
- - on windows https://www.gyan.dev/ffmpeg/builds/
+This action uses FFmpeg builds provided by the following sources:
+ - linux builds https://johnvansickle.com/ffmpeg/
+ - windows builds https://www.gyan.dev/ffmpeg/builds/
