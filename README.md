@@ -6,7 +6,7 @@ Setup FFmpeg in GitHub Actions to use `ffmpeg` and `ffprobe`.
 ```yml
 steps:
   - uses: actions/checkout@v2
-  - uses: FedericoCarboni/setup-ffmpeg@v1-alpha
+  - uses: FedericoCarboni/setup-ffmpeg@v1-beta
     id: setup-ffmpeg
   - run: ffmpeg -i input.avi output.mkv
 ```
