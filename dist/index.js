@@ -4974,7 +4974,7 @@ const tc = __importStar(__webpack_require__(784));
 const exec = __importStar(__webpack_require__(514));
 const GITHUB_REPO = 'FedericoCarboni/setup-ffmpeg';
 const GITHUB_URL = `https://github.com/${GITHUB_REPO}`;
-const PLATFORMS = new Set(['linux', 'win32']);
+const PLATFORMS = new Set(['linux', 'win32', 'darwin']);
 // sets the file as executable acts like chmod +x $path
 const chmodx = (path) => fs.promises.chmod(path, '755');
 function main() {
