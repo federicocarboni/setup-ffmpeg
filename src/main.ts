@@ -10,7 +10,7 @@ import * as exec from '@actions/exec';
 
 const GITHUB_REPO = 'FedericoCarboni/setup-ffmpeg';
 const GITHUB_URL = `https://github.com/${GITHUB_REPO}`;
-const PLATFORMS = new Set(['linux', 'win32']);
+const PLATFORMS = new Set(['linux', 'win32', 'darwin']);
 
 interface Release {
   tag_name: string;
