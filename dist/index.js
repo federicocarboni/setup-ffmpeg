@@ -4978,7 +4978,7 @@ const PLATFORMS = new Set(['linux', 'win32']);
 // sets the file as executable acts like chmod +x $path
 const chmodx = (path) => fs.promises.chmod(path, '755');
 function main() {
-    var _a, _b;
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const platform = os.platform();
@@ -4991,13 +4991,15 @@ function main() {
             const res = yield http.getJson(`https://api.github.com/repos/${GITHUB_REPO}/releases`);
             assert.ok(res.statusCode === 200);
             assert.ok(res.result);
-            const version = (_b = (_a = res.result.find(({ tag_name }) => tag_name.startsWith('ffmpeg-'))) === null || _a === void 0 ? void 0 : _a.tag_name) === null || _b === void 0 ? void 0 : _b.slice(7);
+            const tagName = (_a = res.result.find(({ tag_name }) => tag_name.startsWith('ffmpeg-'))) === null || _a === void 0 ? void 0 : _a.tag_name;
+            assert.ok(tagName);
+            const version = tagName.slice(7, -9);
             assert.ok(version);
             // search in the cache if version is already installed
             let installPath = tc.find('ffmpeg', version, arch);
             // if ffmpeg was not found in cache download it from releases
             if (!installPath) {
-                const downloadURL = `${GITHUB_URL}/releases/download/ffmpeg-${version}/ffmpeg-${platform}-${arch}.tar.gz`;
+                const downloadURL = `${GITHUB_URL}/releases/download/${tagName}/ffmpeg-${platform}-${arch}.tar.gz`;
                 const downloadPath = yield tc.downloadTool(downloadURL);
                 const extractPath = yield tc.extractTar(downloadPath);
                 installPath = yield tc.cacheDir(extractPath, 'ffmpeg', version, arch);
