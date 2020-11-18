@@ -35,7 +35,11 @@ async function main() {
     assert.ok(res.statusCode === 200);
     assert.ok(res.result);
 
-    const version = res.result.find(({ tag_name }) => tag_name.startsWith('ffmpeg-'))?.tag_name?.slice(7);
+    const tagName = res.result.find(({ tag_name }) => tag_name.startsWith('ffmpeg-'))?.tag_name;
+
+    assert.ok(tagName);
+
+    const version = tagName.slice(7, -9);
 
     assert.ok(version);
 
@@ -44,7 +48,7 @@ async function main() {
 
     // if ffmpeg was not found in cache download it from releases
     if (!installPath) {
-      const downloadURL = `${GITHUB_URL}/releases/download/ffmpeg-${version}/ffmpeg-${platform}-${arch}.tar.gz`;
+      const downloadURL = `${GITHUB_URL}/releases/download/${tagName}/ffmpeg-${platform}-${arch}.tar.gz`;
       const downloadPath = await tc.downloadTool(downloadURL);
       const extractPath = await tc.extractTar(downloadPath);
       installPath = await tc.cacheDir(extractPath, 'ffmpeg', version, arch);
