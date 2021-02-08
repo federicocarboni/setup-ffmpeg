@@ -7,7 +7,7 @@ import * as gh from '@octokit/rest';
 import * as core from '@actions/core';
 import * as tc from '@actions/tool-cache';
 import * as exec from '@actions/exec';
-import { createActionAuth, Types } from '@octokit/auth-action';
+import { createActionAuth } from '@octokit/auth-action';
 
 const owner = 'FedericoCarboni';
 const repo = 'setup-ffmpeg';
@@ -27,9 +27,9 @@ async function main() {
     assert.strictEqual(arch, 'x64', 'setup-ffmpeg can only be run on 64-bit systems');
 
     // Fetch the latest build of ffmpeg
-    let auth: Types["Authentication"] | undefined;
+    let auth: string | undefined;
     try {
-      auth = await createActionAuth()().catch(() => void 0);
+      auth = (await createActionAuth()().catch(() => void 0))?.token;
     } catch {
       //
     }
@@ -54,7 +54,7 @@ async function main() {
     // If ffmpeg was not found in cache download it from releases
     if (!installPath) {
       const downloadURL = `${GITHUB_URL}/releases/download/${tagName}/ffmpeg-${platform}-${arch}.tar.gz`;
-      const downloadPath = await tc.downloadTool(downloadURL, void 0, auth?.token);
+      const downloadPath = await tc.downloadTool(downloadURL, void 0, auth);
       const extractPath = await tc.extractTar(downloadPath);
       installPath = await tc.cacheDir(extractPath, 'ffmpeg', version, arch);
     }

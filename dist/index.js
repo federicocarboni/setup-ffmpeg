@@ -9367,7 +9367,7 @@ const PLATFORMS = new Set(['linux', 'win32', 'darwin']);
 // Sets the file as executable acts like chmod +x $path
 const chmodx = (path) => fs.promises.chmod(path, '755');
 function main() {
-    var _a;
+    var _a, _b;
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const platform = os.platform();
@@ -9378,16 +9378,16 @@ function main() {
             // Fetch the latest build of ffmpeg
             let auth;
             try {
-                auth = yield auth_action_1.createActionAuth()().catch(() => void 0);
+                auth = (_a = (yield auth_action_1.createActionAuth()().catch(() => void 0))) === null || _a === void 0 ? void 0 : _a.token;
             }
-            catch (_b) {
+            catch (_c) {
                 //
             }
             const octokit = new gh.Octokit({ auth });
             const releases = yield octokit.repos.listReleases({ owner, repo });
             assert.ok(releases.status === 200);
             assert.ok(releases.data);
-            const tagName = (_a = releases.data.find(({ tag_name }) => tag_name.startsWith('ffmpeg-'))) === null || _a === void 0 ? void 0 : _a.tag_name;
+            const tagName = (_b = releases.data.find(({ tag_name }) => tag_name.startsWith('ffmpeg-'))) === null || _b === void 0 ? void 0 : _b.tag_name;
             assert.ok(tagName);
             const version = tagName.slice(7, -9);
             assert.ok(version);
@@ -9396,7 +9396,7 @@ function main() {
             // If ffmpeg was not found in cache download it from releases
             if (!installPath) {
                 const downloadURL = `${GITHUB_URL}/releases/download/${tagName}/ffmpeg-${platform}-${arch}.tar.gz`;
-                const downloadPath = yield tc.downloadTool(downloadURL, void 0, auth === null || auth === void 0 ? void 0 : auth.token);
+                const downloadPath = yield tc.downloadTool(downloadURL, void 0, auth);
                 const extractPath = yield tc.extractTar(downloadPath);
                 installPath = yield tc.cacheDir(extractPath, 'ffmpeg', version, arch);
             }
