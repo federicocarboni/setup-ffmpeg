@@ -7,7 +7,7 @@ import * as gh from '@octokit/rest';
 import * as core from '@actions/core';
 import * as tc from '@actions/tool-cache';
 import * as exec from '@actions/exec';
-import { createActionAuth } from '@octokit/auth-action';
+import { createActionAuth, Types } from '@octokit/auth-action';
 
 const owner = 'FedericoCarboni';
 const repo = 'setup-ffmpeg';
@@ -27,7 +27,12 @@ async function main() {
     assert.strictEqual(arch, 'x64', 'setup-ffmpeg can only be run on 64-bit systems');
 
     // Fetch the latest build of ffmpeg
-    const auth = await createActionAuth()().catch(() => void 0);
+    let auth: Types["Authentication"] | undefined;
+    try {
+      auth = await createActionAuth()().catch(() => void 0);
+    } catch {
+      //
+    }
 
     const octokit = new gh.Octokit({ auth });
     const releases = await octokit.repos.listReleases({ owner, repo });

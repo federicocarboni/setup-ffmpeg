@@ -9376,7 +9376,13 @@ function main() {
             assert.ok(PLATFORMS.has(platform), `setup-ffmpeg cannot be run on ${platform}`);
             assert.strictEqual(arch, 'x64', 'setup-ffmpeg can only be run on 64-bit systems');
             // Fetch the latest build of ffmpeg
-            const auth = yield auth_action_1.createActionAuth()().catch(() => void 0);
+            let auth;
+            try {
+                auth = yield auth_action_1.createActionAuth()().catch(() => void 0);
+            }
+            catch (_b) {
+                //
+            }
             const octokit = new gh.Octokit({ auth });
             const releases = yield octokit.repos.listReleases({ owner, repo });
             assert.ok(releases.status === 200);
