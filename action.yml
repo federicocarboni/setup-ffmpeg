@@ -1,6 +1,10 @@
 name: Setup FFmpeg
 description: Setup FFmpeg in GitHub Actions
 
+inputs:
+  token:
+    required: false
+
 runs:
   using: node12
   main: dist/index.js
