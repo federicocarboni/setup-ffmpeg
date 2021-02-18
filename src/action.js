@@ -3,19 +3,15 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
 
-import * as gh from '@octokit/rest';
 import * as core from '@actions/core';
 import * as tc from '@actions/tool-cache';
 import * as exec from '@actions/exec';
-import { createActionAuth } from '@octokit/auth-action';
+import { find } from './setup-ffmpeg.js';
 
-const owner = 'FedericoCarboni';
-const repo = 'setup-ffmpeg';
-const GITHUB_URL = `https://github.com/${owner}/${repo}`;
 const PLATFORMS = new Set(['linux', 'win32', 'darwin']);
 
 // Sets the file as executable acts like chmod +x $path
-const chmodx = (path: string) => fs.promises.chmod(path, '755');
+const chmodx = (path) => fs.promises.chmod(path, '755');
 
 async function main() {
   try {
@@ -26,35 +22,17 @@ async function main() {
     assert.ok(PLATFORMS.has(platform), `setup-ffmpeg cannot be run on ${platform}`);
     assert.strictEqual(arch, 'x64', 'setup-ffmpeg can only be run on 64-bit systems');
 
-    // Fetch the latest build of ffmpeg
-    let auth: string | undefined;
-    try {
-      auth = (await createActionAuth()().catch(() => void 0))?.token;
-    } catch {
-      //
-    }
+    const token = [process.env.INPUT_TOKEN, process.env.INPUT_GITHUB_TOKEN, process.env.GITHUB_TOKEN]
+      .filter((token) => token)[0];
 
-    const octokit = new gh.Octokit({ auth });
-    const releases = await octokit.repos.listReleases({ owner, repo });
-
-    assert.ok(releases.status === 200);
-    assert.ok(releases.data);
-
-    const tagName = releases.data.find(({ tag_name }) => tag_name.startsWith('ffmpeg-'))?.tag_name;
-
-    assert.ok(tagName);
-
-    const version = tagName.slice(7, -9);
-
-    assert.ok(version);
+    const { version, url } = await find(platform, arch, { token });
 
     // Search in the cache if version is already installed
     let installPath = tc.find('ffmpeg', version, arch);
 
     // If ffmpeg was not found in cache download it from releases
     if (!installPath) {
-      const downloadURL = `${GITHUB_URL}/releases/download/${tagName}/ffmpeg-${platform}-${arch}.tar.gz`;
-      const downloadPath = await tc.downloadTool(downloadURL, void 0, auth);
+      const downloadPath = await tc.downloadTool(url, void 0, token);
       const extractPath = await tc.extractTar(downloadPath);
       installPath = await tc.cacheDir(extractPath, 'ffmpeg', version, arch);
     }

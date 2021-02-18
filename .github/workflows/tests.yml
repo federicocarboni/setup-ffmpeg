@@ -19,10 +19,12 @@ jobs:
       - uses: actions/checkout@v2
       - name: Run FedericoCarboni/setup-ffmpeg
         uses: ./
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Run FedericoCarboni/setup-ffmpeg
         id: setup-ffmpeg
         uses: ./
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
       - run: ffmpeg -version
       - run: ffprobe -version
