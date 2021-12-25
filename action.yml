@@ -4,6 +4,7 @@ description: Setup FFmpeg in GitHub Actions
 inputs:
   token:
     required: false
+    default: ${{ github.token }}
 
 runs:
   using: node12
