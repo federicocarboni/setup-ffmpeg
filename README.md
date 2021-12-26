@@ -9,10 +9,6 @@ To use `ffmpeg` and `ffprobe`, run the action before them.
 steps:
   - uses: actions/checkout@v2
   - uses: FedericoCarboni/setup-ffmpeg@v1
-    with:
-      # Not strictly necessary, but it may prevent rate limit
-      # errors especially on GitHub-hosted macos machines.
-      token: ${{ secrets.GITHUB_TOKEN }}
     id: setup-ffmpeg
   - run: ffmpeg -i input.avi output.mkv
 ```
