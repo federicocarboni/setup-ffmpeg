@@ -21,14 +21,14 @@
   },
   "homepage": "https://github.com/FedericoCarboni/setup-ffmpeg#readme",
   "devDependencies": {
-    "@types/node": "^14.14.7",
+    "@types/node": "^16.11.68",
     "@vercel/ncc": "^0.27.0",
-    "eslint": "^7.13.0"
+    "eslint": "^7.32.0"
   },
   "dependencies": {
-    "@actions/core": "^1.2.6",
-    "@actions/exec": "^1.0.4",
-    "@actions/tool-cache": "^1.6.1",
-    "@octokit/rest": "^18.1.1"
+    "@actions/core": "^1.10.0",
+    "@actions/exec": "^1.1.1",
+    "@actions/tool-cache": "^1.7.2",
+    "@octokit/rest": "^18.12.0"
   }
 }
