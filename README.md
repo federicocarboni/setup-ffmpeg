@@ -7,8 +7,8 @@ To use `ffmpeg` and `ffprobe`, run the action before them.
 
 ```yml
 steps:
-  - uses: actions/checkout@v2
-  - uses: FedericoCarboni/setup-ffmpeg@v1
+  - uses: actions/checkout@v3
+  - uses: FedericoCarboni/setup-ffmpeg@v2
     id: setup-ffmpeg
   - run: ffmpeg -i input.avi output.mkv
 ```
