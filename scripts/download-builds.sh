@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # Check the versions that will be used
-linux_version=`curl -L https://johnvansickle.com/ffmpeg/release-readme.txt 2> /dev/null | grep "version: " | cut -d " " -f 16`
-win32_version=`curl -L https://www.gyan.dev/ffmpeg/builds/release-version 2> /dev/null | cut -d "-" -f 1`
-darwin_version=`curl -L https://evermeet.cx/ffmpeg/info/ffmpeg/release 2> /dev/null | cut -d "," -f 3 | cut -d "\"" -f 4`
+linux_version=$(curl -L https://johnvansickle.com/ffmpeg/release-readme.txt 2>/dev/null | grep "version: " | cut -d " " -f 16)
+win32_version=$(curl -L https://www.gyan.dev/ffmpeg/builds/release-version 2>/dev/null | cut -d "-" -f 1)
+darwin_version=$(curl -L https://evermeet.cx/ffmpeg/info/ffmpeg/release 2>/dev/null | cut -d "," -f 3 | cut -d "\"" -f 4)
 
 # Make sure that the versions are the same
 if [ "$linux_version" != "$win32_version" ] || [ "$linux_version" != "$darwin_version" ]; then
@@ -13,44 +13,44 @@ fi
 
 echo "downloading ffmpeg builds for release $linux_version"
 
-linux_url='https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz'
-linux_temp_archive='/tmp/ffmpeg-release-amd64-static.tar.xz'
-linux_name='ffmpeg-linux-x64'
+linux_url="https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz"
+linux_temp_archive="/tmp/ffmpeg-release-amd64-static.tar.xz"
+linux_name="ffmpeg-linux-x64"
 linux_temp="/tmp/$linux_name"
 linux_archive="$linux_name.tar.gz"
 
-win32_url='https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full.7z'
-win32_temp_archive='/tmp/ffmpeg-release-full.7z'
-win32_name='ffmpeg-win32-x64'
+win32_url="https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full.7z"
+win32_temp_archive="/tmp/ffmpeg-release-full.7z"
+win32_name="ffmpeg-win32-x64"
 win32_temp="/tmp/$win32_name"
 win32_archive="$win32_name.tar.gz"
 
-darwin_url='https://evermeet.cx/ffmpeg/getrelease'
-darwin_name='ffmpeg-darwin-x64'
+darwin_url="https://evermeet.cx/ffmpeg/getrelease"
+darwin_name="ffmpeg-darwin-x64"
 darwin_temp="/tmp/$darwin_name"
 darwin_archive="$darwin_name.tar.gz"
 
 download() {
   echo "setup-ffmpeg: downloading $1 to $2"
-  curl -L $1 -o $2
+  curl -L "$1" -o "$2"
 }
 
 create_archive() {
   echo "setup-ffmpeg: creating archive $1 from $2"
   curdir=$PWD
-  cd $2
+  cd "$2"
   tar -czvf "$curdir/$1" *
-  cd $curdir
+  cd "$curdir"
 }
 
 tar_extract() {
   echo "setup-ffmpeg: extracting $2 from $1 to $3"
-  tar -xf $1 --wildcards -O $2 > $3
+  tar -xf "$1" --wildcards -O "$2" >"$3"
 }
 
 remove() {
   echo "setup-ffmpeg: removing $1"
-  rm -rf $1
+  rm -rf "$1"
 }
 
 create_linux_archive() {
@@ -117,9 +117,10 @@ create_linux_archive
 create_win32_archive
 create_darwin_archive
 
-# Expose the version to the next steps in the workflow
-echo "::set-output name=version::$linux_version"
-# Expose paths to the archives
-echo "::set-output name=linux-path::$linux_archive"
-echo "::set-output name=win32-path::$win32_archive"
-echo "::set-output name=darwin-path::$darwin_archive"
+# Expose version and paths to the next steps in the workflow
+{
+  echo "version=$linux_version"
+  echo "linux-path=$linux_archive"
+  echo "win32-path=$win32_archive"
+  echo "darwin-path=$darwin_archive"
+} >>"$GITHUB_OUTPUT"
