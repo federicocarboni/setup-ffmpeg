@@ -14,7 +14,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - run: echo "name=date::$(date +'%Y%m%d')"
+      - run: echo "date=$(date +'%Y%m%d')" >> "$GITHUB_OUTPUT"
         id: date
       - run: sudo sh ./scripts/download-builds.sh
         id: builds
