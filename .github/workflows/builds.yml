@@ -2,10 +2,6 @@ name: Release Builds
 
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - '**/builds.yml'
-      - '**/download-builds.sh'
   schedule:
     - cron: '0 0 1 * *'
 
@@ -21,6 +17,7 @@ jobs:
         id: builds
       - uses: softprops/action-gh-release@v1
         with:
+          tag_name: ffmpeg-${{ steps.builds.outputs.version }}-${{ steps.date.outputs.date }}
           files: |
             ${{ steps.builds.outputs.linux-path }}
             ${{ steps.builds.outputs.win32-path }}
