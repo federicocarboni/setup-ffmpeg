@@ -52926,9 +52926,7 @@ async function sha256sum(file) {
 async function verifyGpgSig(keyId, sig, file) {
   // Create a temporary keyring to avoid polluting the default keyring
   const keyring = external_path_default().join(temp(), keyId + '.gpg');
-  const gnupg = external_path_default().join(process.env['HOME'], '.gnupg');
-  await (0,external_fs_promises_namespaceObject.mkdir)(gnupg);
-  await (0,external_fs_promises_namespaceObject.chmod)(gnupg, '700');
+  await (0,external_fs_promises_namespaceObject.mkdir)(external_path_default().join(process.env['HOME'], '.gnupg'), { recursive: true, mode: '700' });
   external_assert_default().ok(
     await (0,exec.exec)('gpg --no-default-keyring --keyring', [keyring, '--recv-keys', keyId]) === 0,
     'Could not create temporary keyring to verify GPG signature'
