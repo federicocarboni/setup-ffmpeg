@@ -30542,7 +30542,7 @@ var external_crypto_ = __nccwpck_require__(6113);
 
 
 
-function integrity_temp() {
+function temp() {
   const tempDirectory = process.env['RUNNER_TEMP'] || '';
   external_assert_default().ok(tempDirectory, 'Expected RUNNER_TEMP to be defined');
   return tempDirectory;
@@ -30582,7 +30582,7 @@ async function sha256sum(file) {
  */
 async function verifyGpgSig(keyId, sig, file) {
   // Create a temporary keyring to avoid polluting the default keyring
-  const keyring = external_path_default().join(integrity_temp(), keyId + '.gpg');
+  const keyring = external_path_default().join(temp(), keyId + '.gpg');
   external_assert_default().ok(
     await (0,exec.exec)('gpg --no-default-keyring --keyring', [keyring, '--recv-keys', keyId]) === 0,
     'Could not create temporary keyring to verify GPG signature'
@@ -30593,6 +30593,7 @@ async function verifyGpgSig(keyId, sig, file) {
 }
 
 ;// CONCATENATED MODULE: ./src/download.js
+
 
 
 

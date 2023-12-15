@@ -3,11 +3,12 @@ import * as http from '@actions/http-client';
 
 import assert from 'assert';
 import * as os from 'os';
-import { md5sum, sha256sum, verifyGpgSig } from './integrity';
 import { pipeline } from 'stream/promises';
 import { createWriteStream } from 'fs';
 import path from 'path';
 import { mkdir, readFile, readdir, rename } from 'fs/promises';
+
+import { md5sum, sha256sum, verifyGpgSig, temp } from './integrity';
 
 /**
  * @typedef {object} DownloadOptions
