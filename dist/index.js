@@ -30677,7 +30677,7 @@ async function downloadWindows({ version, skipVerify }) {
     external_assert_default().strictEqual(await sha256sum(downloadPath), hash, VERIFICATION_FAIL);
   }
   console.log(downloadPath);
-  const extractPath = await tool_cache.extract7z(downloadPath);
+  const extractPath = await tool_cache.extract7z(downloadPath, void 0, __nccwpck_require__.ab + "7zr.exe");
   console.log(extractPath);
   return await tool_cache.cacheDir(extractPath, 'ffmpeg', version);
 }
