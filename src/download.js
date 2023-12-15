@@ -7,7 +7,7 @@ import { md5sum, sha256sum, verifyGpgSig } from './integrity';
 import { pipeline } from 'stream/promises';
 import { createWriteStream } from 'fs';
 import path from 'path';
-import { mkdir, readdir, rename } from 'fs/promises';
+import { mkdir, readFile, readdir, rename } from 'fs/promises';
 
 /**
  * @typedef {object} DownloadOptions
@@ -51,8 +51,15 @@ async function downloadLinux({ version, skipVerify }) {
     assert.strictEqual(await md5sum(downloadPath), hash, VERIFICATION_FAIL);
   }
   const extractPath = await tc.extractTar(downloadPath, void 0, 'x');
-  const files = await readdir(extractPath);
-  return await tc.cacheDir(path.join(extractPath, files[0]), 'ffmpeg', version);
+  // Extract path contains a single directory
+  const dirs = await readdir(extractPath);
+  const dir = path.join(extractPath, dirs.filter((name) => name.startsWith('ffmpeg-'))[0]);
+
+  // Report the correct version (or git commit) so that caching can be effective
+  const readme = await readFile(path.join(dir, 'readme.txt'), 'utf8');
+  version = readme.match(/version\: (.+)\n/)[1] || version;
+
+  return await tc.cacheDir(dir, 'ffmpeg', version);
 }
 
 /**

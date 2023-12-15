@@ -34,7 +34,7 @@ async function main() {
     if (!installPath) {
       installPath = await download({
         version,
-        skipVerify: true,
+        skipVerify: false,
       });
     }
 
