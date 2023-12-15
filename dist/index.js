@@ -30712,8 +30712,9 @@ async function downloadMac({ version, skipVerify }) {
   const ffprobeSig = ffprobe + ext;
   console.log(ffmpeg);
   console.log(ffprobe);
-  const ffmpegPath = await tool_cache.downloadTool(ffmpeg);
-  const ffprobePath = await tool_cache.downloadTool(ffprobe);
+  // const ffmpegPath = await tc.downloadTool(ffmpeg);
+  // const ffprobePath = await tc.downloadTool(ffprobe);
+
   console.log(ffmpegSig);
   console.log(ffprobeSig);
   if (!skipVerify) {
@@ -30721,6 +30722,7 @@ async function downloadMac({ version, skipVerify }) {
     const ffprobeSigFile = external_path_default().join(temp(), `ffprobe-${version}.zip.sig`);
     await downloadToFile(ffmpegSig, ffmpegSigFile);
     await downloadToFile(ffprobeSig, ffprobeSigFile);
+    console.log(ffmpegSigFile);
     external_assert_default().ok(await verifyGpgSig('0x476C4B611A660874', ffmpegSigFile, ffmpegPath), VERIFICATION_FAIL);
     external_assert_default().ok(await verifyGpgSig('0x476C4B611A660874', ffprobeSigFile, ffprobePath), VERIFICATION_FAIL);
   }
