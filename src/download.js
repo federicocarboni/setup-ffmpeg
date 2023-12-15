@@ -115,8 +115,12 @@ async function downloadMac({ version, skipVerify }) {
   const ext = version === 'git' || version === 'release' ? '/sig' : '.sig';
   const ffmpegSig = ffmpeg + ext;
   const ffprobeSig = ffprobe + ext;
+  console.log(ffmpeg);
+  console.log(ffprobe);
   const ffmpegPath = await tc.downloadTool(ffmpeg);
   const ffprobePath = await tc.downloadTool(ffprobe);
+  console.log(ffmpegSig);
+  console.log(ffprobeSig);
   if (!skipVerify) {
     const ffmpegSigFile = path.join(temp(), `ffmpeg-${version}.zip.sig`);
     const ffprobeSigFile = path.join(temp(), `ffprobe-${version}.zip.sig`);

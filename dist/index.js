@@ -30710,8 +30710,12 @@ async function downloadMac({ version, skipVerify }) {
   const ext = version === 'git' || version === 'release' ? '/sig' : '.sig';
   const ffmpegSig = ffmpeg + ext;
   const ffprobeSig = ffprobe + ext;
+  console.log(ffmpeg);
+  console.log(ffprobe);
   const ffmpegPath = await tool_cache.downloadTool(ffmpeg);
   const ffprobePath = await tool_cache.downloadTool(ffprobe);
+  console.log(ffmpegSig);
+  console.log(ffprobeSig);
   if (!skipVerify) {
     const ffmpegSigFile = external_path_default().join(temp(), `ffmpeg-${version}.zip.sig`);
     const ffprobeSigFile = external_path_default().join(temp(), `ffprobe-${version}.zip.sig`);
