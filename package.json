@@ -1,6 +1,5 @@
 {
   "name": "setup-ffmpeg",
-  "type": "module",
   "version": "3.0.0",
   "private": true,
   "description": "Setup FFmpeg in GitHub Actions",
@@ -23,7 +22,7 @@
   "homepage": "https://github.com/FedericoCarboni/setup-ffmpeg#readme",
   "devDependencies": {
     "@types/node": "^20.10.4",
-    "@vercel/ncc": "^0.36.1",
+    "@vercel/ncc": "^0.38.1",
     "eslint": "^8.55.0"
   },
   "dependencies": {
