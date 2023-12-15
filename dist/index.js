@@ -30646,7 +30646,8 @@ async function downloadLinux({ version, skipVerify }) {
     external_assert_default().strictEqual(await md5sum(downloadPath), hash, VERIFICATION_FAIL);
   }
   const extractPath = await tool_cache.extractTar(downloadPath, void 0, 'x');
-  return await tool_cache.cacheDir(extractPath, 'ffmpeg', version);
+  const files = await (0,external_fs_promises_namespaceObject.readdir)(extractPath);
+  return await tool_cache.cacheDir(external_path_default().join(extractPath, files[0]), 'ffmpeg', version);
 }
 
 /**
