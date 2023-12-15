@@ -1,5 +1,5 @@
 import { pipeline } from 'stream/promises';
-import { unlink } from 'fs/promises';
+import { mkdir, unlink } from 'fs/promises';
 import { createHash } from 'crypto';
 import assert from 'assert';
 import { createReadStream } from 'fs';
