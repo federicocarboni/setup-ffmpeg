@@ -26,9 +26,10 @@ function getLinuxArch() {
 }
 
 async function downloadText(url) {
-  const client = new http.HttpClient();
-  const res = await client.get(url);
-  return await res.readBody();
+  const res = await http.request(url, {
+    maxRedirections: 5,
+  });
+  return await res.body.text();
 }
 
 async function downloadToFile(url, file) {

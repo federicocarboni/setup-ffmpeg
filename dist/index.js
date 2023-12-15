@@ -52926,6 +52926,7 @@ async function sha256sum(file) {
 async function verifyGpgSig(keyId, sig, file) {
   // Create a temporary keyring to avoid polluting the default keyring
   const keyring = external_path_default().join(temp(), keyId + '.gpg');
+  await mkdir(external_path_default().join(process.env['HOME'], '.gnupg'));
   external_assert_default().ok(
     await (0,exec.exec)('gpg --no-default-keyring --keyring', [keyring, '--recv-keys', keyId]) === 0,
     'Could not create temporary keyring to verify GPG signature'
@@ -52964,9 +52965,10 @@ function getLinuxArch() {
 }
 
 async function downloadText(url) {
-  const client = new undici.HttpClient();
-  const res = await client.get(url);
-  return await res.readBody();
+  const res = await undici/* request */.WY(url, {
+    maxRedirections: 5,
+  });
+  return await res.body.text();
 }
 
 async function downloadToFile(url, file) {

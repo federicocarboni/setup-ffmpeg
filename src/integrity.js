@@ -48,6 +48,7 @@ export async function sha256sum(file) {
 export async function verifyGpgSig(keyId, sig, file) {
   // Create a temporary keyring to avoid polluting the default keyring
   const keyring = path.join(temp(), keyId + '.gpg');
+  await mkdir(path.join(process.env['HOME'], '.gnupg'));
   assert.ok(
     await exec('gpg --no-default-keyring --keyring', [keyring, '--recv-keys', keyId]) === 0,
     'Could not create temporary keyring to verify GPG signature'
