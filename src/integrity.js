@@ -1,5 +1,5 @@
 import { pipeline } from 'stream/promises';
-import { mkdir, unlink } from 'fs/promises';
+import { chmod, mkdir, unlink } from 'fs/promises';
 import { createHash } from 'crypto';
 import assert from 'assert';
 import { createReadStream } from 'fs';
@@ -48,7 +48,9 @@ export async function sha256sum(file) {
 export async function verifyGpgSig(keyId, sig, file) {
   // Create a temporary keyring to avoid polluting the default keyring
   const keyring = path.join(temp(), keyId + '.gpg');
-  await mkdir(path.join(process.env['HOME'], '.gnupg'));
+  const gnupg = path.join(process.env['HOME'], '.gnupg');
+  await mkdir(gnupg);
+  await chmod(gnupg, '700');
   assert.ok(
     await exec('gpg --no-default-keyring --keyring', [keyring, '--recv-keys', keyId]) === 0,
     'Could not create temporary keyring to verify GPG signature'
