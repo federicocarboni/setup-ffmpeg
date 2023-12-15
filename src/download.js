@@ -81,9 +81,18 @@ async function downloadWindows({ version, skipVerify }) {
     const hash = await downloadText(sig);
     assert.strictEqual(await sha256sum(downloadPath), hash, VERIFICATION_FAIL);
   }
-  console.log(downloadPath);
   const extractPath = await tc.extract7z(downloadPath, void 0, path.join(__dirname, '..', 'scripts', '7zr.exe'));
-  return await tc.cacheDir(path.join(extractPath, 'bin'), 'ffmpeg', version);
+  // Extract path contains a single directory
+  const dirs = await readdir(extractPath);
+  const dir = path.join(extractPath, dirs.filter((name) => name.startsWith('ffmpeg-'))[0]);
+
+  // Report the correct version (or git commit) so that caching can be effective
+  if (version === 'git' || version === 'release') {
+    const readme = await readFile(path.join(dir, 'README.txt'), 'utf8');
+    version = readme.match(/Version\: (.+)\n/)[1].trim().replace(/-full_build-www\.gyan\.dev$/) || version;
+  }
+
+  return await tc.cacheDir(path.join(extractPath, dir, 'bin'), 'ffmpeg', version);
 }
 
 /**
