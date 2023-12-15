@@ -30687,7 +30687,7 @@ async function downloadWindows({ version, skipVerify }) {
     version = readme.match(/Version\: (.+)\n/)[1].trim().replace(/-full_build-www\.gyan\.dev$/) || version;
   }
 
-  return await tool_cache.cacheDir(external_path_default().join(extractPath, dir, 'bin'), 'ffmpeg', version);
+  return await tool_cache.cacheDir(external_path_default().join(dir, 'bin'), 'ffmpeg', version);
 }
 
 /**
