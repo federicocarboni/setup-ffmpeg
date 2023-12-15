@@ -33,9 +33,11 @@ async function downloadText(url) {
 
 async function downloadToFile(url, file) {
   const client = new http.HttpClient();
-  const res = await client.get(url);
-  console.log(res);
-  await pipeline(res.message, createWriteStream(file));
+  try {
+    const res = await client.get(url);
+    await pipeline(res.message, createWriteStream(file));
+  } catch (err){
+  console.log(err);}
 }
 
 /**

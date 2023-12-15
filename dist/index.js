@@ -30628,9 +30628,11 @@ async function downloadText(url) {
 
 async function downloadToFile(url, file) {
   const client = new lib.HttpClient();
-  const res = await client.get(url);
-  console.log(res);
-  await (0,promises_namespaceObject.pipeline)(res.message, (0,external_fs_.createWriteStream)(file));
+  try {
+    const res = await client.get(url);
+    await (0,promises_namespaceObject.pipeline)(res.message, (0,external_fs_.createWriteStream)(file));
+  } catch (err){
+  console.log(err);}
 }
 
 /**
