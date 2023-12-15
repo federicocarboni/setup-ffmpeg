@@ -30645,7 +30645,7 @@ async function downloadLinux({ version, skipVerify }) {
     const hash = await downloadText(sig);
     external_assert_default().strictEqual(await md5sum(downloadPath), hash, VERIFICATION_FAIL);
   }
-  const extractPath = await tool_cache.extractTar(downloadPath);
+  const extractPath = await tool_cache.extractTar(downloadPath, void 0, 'x');
   return await tool_cache.cacheDir(extractPath, 'ffmpeg', version);
 }
 
