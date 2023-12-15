@@ -47,7 +47,7 @@ async function downloadLinux({ version, skipVerify }) {
   const sig = tool + '.md5';
   const downloadPath = await tc.downloadTool(tool);
   if (!skipVerify) {
-    const hash = await downloadText(sig);
+    const hash = (await downloadText(sig)).trimStart().split(' ')[0].trim();
     assert.strictEqual(await md5sum(downloadPath), hash, VERIFICATION_FAIL);
   }
   const extractPath = await tc.extractTar(downloadPath, void 0, 'x');
