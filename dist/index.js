@@ -52931,7 +52931,7 @@ async function verifyGpgSig(keyId, sig, file) {
     await (0,exec.exec)('gpg --no-default-keyring --keyring', [keyring, '--recv-keys', keyId]) === 0,
     'Could not create temporary keyring to verify GPG signature'
   );
-  const code = (0,exec.exec)('gpg --no-default-keyring --keyring', [keyring, '--verify', sig, file]);
+  const code = await (0,exec.exec)('gpg --no-default-keyring --keyring', [keyring, '--verify', sig, file]);
   await (0,external_fs_promises_namespaceObject.unlink)(keyring);
   return code === 0;
 }
