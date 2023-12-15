@@ -56,8 +56,10 @@ async function downloadLinux({ version, skipVerify }) {
   const dir = path.join(extractPath, dirs.filter((name) => name.startsWith('ffmpeg-'))[0]);
 
   // Report the correct version (or git commit) so that caching can be effective
-  const readme = await readFile(path.join(dir, 'readme.txt'), 'utf8');
-  version = readme.match(/version\: (.+)\n/)[1] || version;
+  if (version === 'git' || version === 'release') {
+    const readme = await readFile(path.join(dir, 'readme.txt'), 'utf8');
+    version = readme.match(/version\: (.+)\n/)[1].trim() || version;
+  }
 
   return await tc.cacheDir(dir, 'ffmpeg', version);
 }
@@ -69,9 +71,9 @@ async function downloadWindows({ version, skipVerify }) {
   assert.strictEqual(os.arch(), 'x64', UNSUPPORTED_PLATFORM);
   let tool;
   if (version === 'git' || version === 'release') {
-    tool = `https://www.gyan.dev/ffmpeg/builds/ffmpeg-${version}-full.7z`;
+    tool = `https://www.gyan.dev/ffmpeg/builds/ffmpeg-${version}-full.zip`;
   } else {
-    tool = `https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-${version}-full_build.7z`;
+    tool = `https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-${version}-full_build.zip`;
   }
   const sig = tool + '.sha256';
   const downloadPath = await tc.downloadTool(tool);
@@ -79,7 +81,7 @@ async function downloadWindows({ version, skipVerify }) {
     const hash = await downloadText(sig);
     assert.strictEqual(await sha256sum(downloadPath), hash, VERIFICATION_FAIL);
   }
-  const extractPath = await tc.extract7z(downloadPath);
+  const extractPath = await tc.extractZip(downloadPath);
   return await tc.cacheDir(extractPath, 'ffmpeg', version);
 }
 
