@@ -30646,8 +30646,15 @@ async function downloadLinux({ version, skipVerify }) {
     external_assert_default().strictEqual(await md5sum(downloadPath), hash, VERIFICATION_FAIL);
   }
   const extractPath = await tool_cache.extractTar(downloadPath, void 0, 'x');
-  const files = await (0,external_fs_promises_namespaceObject.readdir)(extractPath);
-  return await tool_cache.cacheDir(external_path_default().join(extractPath, files[0]), 'ffmpeg', version);
+  // Extract path contains a single directory
+  const dirs = await (0,external_fs_promises_namespaceObject.readdir)(extractPath);
+  const dir = external_path_default().join(extractPath, dirs.filter((name) => name.startsWith('ffmpeg-'))[0]);
+
+  // Report the correct version (or git commit) so that caching can be effective
+  const readme = await (0,external_fs_promises_namespaceObject.readFile)(external_path_default().join(dir, 'readme.txt'), 'utf8');
+  version = readme.match(/version\: (.+)\n/)[1] || version;
+
+  return await tool_cache.cacheDir(dir, 'ffmpeg', version);
 }
 
 /**
@@ -30765,7 +30772,7 @@ async function main() {
     if (!installPath) {
       installPath = await download({
         version,
-        skipVerify: true,
+        skipVerify: false,
       });
     }
 
