@@ -30678,8 +30678,7 @@ async function downloadWindows({ version, skipVerify }) {
   }
   console.log(downloadPath);
   const extractPath = await tool_cache.extract7z(downloadPath, void 0, __nccwpck_require__.ab + "7zr.exe");
-  console.log(extractPath);
-  return await tool_cache.cacheDir(extractPath, 'ffmpeg', version);
+  return await tool_cache.cacheDir(external_path_default().join(extractPath, 'bin'), 'ffmpeg', version);
 }
 
 /**

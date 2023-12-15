@@ -83,8 +83,7 @@ async function downloadWindows({ version, skipVerify }) {
   }
   console.log(downloadPath);
   const extractPath = await tc.extract7z(downloadPath, void 0, path.join(__dirname, '..', 'scripts', '7zr.exe'));
-  console.log(extractPath);
-  return await tc.cacheDir(extractPath, 'ffmpeg', version);
+  return await tc.cacheDir(path.join(extractPath, 'bin'), 'ffmpeg', version);
 }
 
 /**
