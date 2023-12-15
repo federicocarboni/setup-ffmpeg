@@ -71,9 +71,9 @@ async function downloadWindows({ version, skipVerify }) {
   assert.strictEqual(os.arch(), 'x64', UNSUPPORTED_PLATFORM);
   let tool;
   if (version === 'git' || version === 'release') {
-    tool = `https://www.gyan.dev/ffmpeg/builds/ffmpeg-${version}-full.zip`;
+    tool = `https://www.gyan.dev/ffmpeg/builds/ffmpeg-${version}-full.7z`;
   } else {
-    tool = `https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-${version}-full_build.zip`;
+    tool = `https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-${version}-full_build.7z`;
   }
   const sig = tool + '.sha256';
   const downloadPath = await tc.downloadTool(tool);
@@ -81,7 +81,8 @@ async function downloadWindows({ version, skipVerify }) {
     const hash = await downloadText(sig);
     assert.strictEqual(await sha256sum(downloadPath), hash, VERIFICATION_FAIL);
   }
-  const extractPath = await tc.extractZip(downloadPath);
+  console.log(extractPath);
+  const extractPath = await tc.extract7z(downloadPath);
   return await tc.cacheDir(extractPath, 'ffmpeg', version);
 }
 
