@@ -1,5 +1,5 @@
 import * as tc from '@actions/tool-cache';
-import * as http from '@actions/http-client';
+import * as http from 'undici';
 
 import assert from 'assert';
 import * as os from 'os';
@@ -32,12 +32,11 @@ async function downloadText(url) {
 }
 
 async function downloadToFile(url, file) {
-  const client = new http.HttpClient();
-  try {
-    const res = await client.get(url);
-    await pipeline(res.message, createWriteStream(file));
-  } catch (err){
-  console.log(err);}
+  // Apparently @actions/http-client is bugged with redirect responses
+  const res = await http.request(url, {
+    maxRedirections: 5,
+  });
+  await pipeline(res.body, createWriteStream(file));
 }
 
 /**
@@ -121,23 +120,21 @@ async function downloadMac({ version, skipVerify }) {
   const ffprobeSig = ffprobe + ext;
   console.log(ffmpeg);
   console.log(ffprobe);
-  // const ffmpegPath = await tc.downloadTool(ffmpeg);
-  // const ffprobePath = await tc.downloadTool(ffprobe);
-
-  console.log(ffmpegSig);
-  console.log(ffprobeSig);
+  const ffmpegPath = path.join(temp(), `ffmpeg-${version}.zip`);
+  const ffprobePath = path.join(temp(), `ffprobe-${version}.zip`);
+  await downloadToFile(ffmpeg, ffmpegPath);
+  await downloadToFile(ffprobe, ffprobePath);
   if (!skipVerify) {
     const ffmpegSigFile = path.join(temp(), `ffmpeg-${version}.zip.sig`);
     const ffprobeSigFile = path.join(temp(), `ffprobe-${version}.zip.sig`);
     await downloadToFile(ffmpegSig, ffmpegSigFile);
     await downloadToFile(ffprobeSig, ffprobeSigFile);
-    console.log(ffmpegSigFile);
     assert.ok(await verifyGpgSig('0x476C4B611A660874', ffmpegSigFile, ffmpegPath), VERIFICATION_FAIL);
     assert.ok(await verifyGpgSig('0x476C4B611A660874', ffprobeSigFile, ffprobePath), VERIFICATION_FAIL);
   }
   const ffmpegExtractPath = await tc.extractZip(ffmpegPath);
   const ffprobeExtractPath = await tc.extractZip(ffprobePath);
-  const combinedPath = path.join(temp(), `ffmpeg-ffprobe`);
+  const combinedPath = path.join(temp(), `ffmpeg-ffprobe-${version}`);
   await mkdir(combinedPath);
   await rename(path.join(ffmpegExtractPath, 'ffmpeg'), path.join(combinedPath, 'ffmpeg'));
   await rename(path.join(ffprobeExtractPath, 'ffprobe'), path.join(combinedPath, 'ffprobe'));
