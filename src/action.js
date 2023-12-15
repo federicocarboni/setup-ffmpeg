@@ -6,7 +6,7 @@ import * as os from 'os';
 import * as core from '@actions/core';
 import * as tc from '@actions/tool-cache';
 import * as exec from '@actions/exec';
-import { find } from './setup-ffmpeg.js';
+import { download } from './download.js';
 
 const PLATFORMS = new Set(['linux', 'win32', 'darwin']);
 
@@ -22,19 +22,20 @@ async function main() {
     assert.ok(PLATFORMS.has(platform), `setup-ffmpeg cannot be run on ${platform}`);
     assert.strictEqual(arch, 'x64', 'setup-ffmpeg can only be run on 64-bit systems');
 
-    const token = [process.env.INPUT_TOKEN, process.env.INPUT_GITHUB_TOKEN, process.env.GITHUB_TOKEN]
-      .filter((token) => token)[0];
+    // const token = [process.env.INPUT_TOKEN, process.env.INPUT_GITHUB_TOKEN, process.env.GITHUB_TOKEN]
+    //   .filter((token) => token)[0];
 
-    const { version, url } = await find(platform, arch, { token });
+    const version = core.getInput('version');
 
     // Search in the cache if version is already installed
     let installPath = tc.find('ffmpeg', version, arch);
 
     // If ffmpeg was not found in cache download it from releases
     if (!installPath) {
-      const downloadPath = await tc.downloadTool(url, void 0, token);
-      const extractPath = await tc.extractTar(downloadPath);
-      installPath = await tc.cacheDir(extractPath, 'ffmpeg', version, arch);
+      installPath = await download({
+        version,
+        skipVerify: true,
+      });
     }
 
     assert.ok(installPath);
