@@ -30642,7 +30642,7 @@ async function downloadLinux({ version, skipVerify }) {
   const sig = tool + '.md5';
   const downloadPath = await tool_cache.downloadTool(tool);
   if (!skipVerify) {
-    const hash = await downloadText(sig);
+    const hash = (await downloadText(sig)).trimStart().split(' ')[0].trim();
     external_assert_default().strictEqual(await md5sum(downloadPath), hash, VERIFICATION_FAIL);
   }
   const extractPath = await tool_cache.extractTar(downloadPath, void 0, 'x');
