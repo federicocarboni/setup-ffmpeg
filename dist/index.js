@@ -53136,6 +53136,8 @@ async function main() {
 
     const toolVersion = version === 'git' || version === 'release' ? getToolVersion(version) : version;
 
+    console.log(toolVersion);
+
     // Search in the cache if version is already installed
     let installPath = tool_cache.find('ffmpeg', toolVersion);
 
