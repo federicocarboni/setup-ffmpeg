@@ -53783,6 +53783,9 @@ async function downloadMac({ version, toolVersion, skipVerify }) {
     await downloadToFile('https://evermeet.cx/ffmpeg/0x1A660874.asc', keyFile);
     external_assert_default().ok(await verifyGpgSig(keyFile, ffmpegSigFile, ffmpegPath), VERIFICATION_FAIL);
     external_assert_default().ok(await verifyGpgSig(keyFile, ffprobeSigFile, ffprobePath), VERIFICATION_FAIL);
+    await (0,external_fs_promises_namespaceObject.unlink)(ffmpegSigFile);
+    await (0,external_fs_promises_namespaceObject.unlink)(ffprobeSigFile);
+    await (0,external_fs_promises_namespaceObject.unlink)(keyFile);
   }
   const ffmpegExtractPath = await tool_cache.extractZip(ffmpegPath);
   const ffprobeExtractPath = await tool_cache.extractZip(ffprobePath);
@@ -53833,6 +53836,8 @@ async function main() {
     const version = core.getInput('version');
 
     const toolVersion = version === 'git' || version === 'release' ? await getToolVersion(version) : version;
+
+    console.log(toolVersion);
 
     // Search in the cache if version is already installed
     let installPath = tool_cache.find('ffmpeg', toolVersion);

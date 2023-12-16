@@ -7,7 +7,7 @@ import * as os from 'os';
 import { pipeline } from 'stream/promises';
 import { createWriteStream } from 'fs';
 import path from 'path';
-import { mkdir, readFile, readdir, rename } from 'fs/promises';
+import { mkdir, readFile, readdir, rename, unlink } from 'fs/promises';
 
 import { md5sum, sha256sum, verifyGpgSig, temp } from './integrity';
 
@@ -147,6 +147,9 @@ async function downloadMac({ version, toolVersion, skipVerify }) {
     await downloadToFile('https://evermeet.cx/ffmpeg/0x1A660874.asc', keyFile);
     assert.ok(await verifyGpgSig(keyFile, ffmpegSigFile, ffmpegPath), VERIFICATION_FAIL);
     assert.ok(await verifyGpgSig(keyFile, ffprobeSigFile, ffprobePath), VERIFICATION_FAIL);
+    await unlink(ffmpegSigFile);
+    await unlink(ffprobeSigFile);
+    await unlink(keyFile);
   }
   const ffmpegExtractPath = await tc.extractZip(ffmpegPath);
   const ffprobeExtractPath = await tc.extractZip(ffprobePath);
