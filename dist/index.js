@@ -52953,7 +52953,8 @@ async function verifyGpgSig(keyId, sig, file) {
  * @typedef {object} DownloadOptions
  * @property {string} version FFmpeg version, i.e. 6.1.0, git (for git master
  *  builds), release (for latest release builds)
- * @property {boolean} skipVerify Skip verifying signatures of downloaded files
+ * @property {string} toolVersion version to use for tool caching
+ * @property {boolean} skipVerify Skip verifying signatures/hashes of downloaded files
  */
 
 const UNSUPPORTED_PLATFORM = 'Unsupported platform/architecture combination';
@@ -52980,9 +52981,31 @@ async function downloadToFile(url, file) {
 }
 
 /**
+ *
+ * @param {'git' | 'release'} version
+ * @returns {string}
+ */
+async function getToolVersion(version) {
+  const platform = external_os_.platform();
+  if (platform === 'linux') {
+    const readme = await downloadText(`https://johnvansickle.com/ffmpeg/${version === 'git' ? 'git-' : ''}readme.txt`);
+    return readme.match(/version\: (.+)\n/)[1].trim()
+  } else if (platform === 'win32') {
+    const ver = await downloadText(`https://www.gyan.dev/ffmpeg/builds/${version}-version`);
+    return ver.trim();
+  } else if (platform === 'darwin') {
+    const res = await undici/* request */.WY(`https://evermeet.cx/ffmpeg/info/ffmpeg/${version === 'git' ? 'snapshot' : 'release'}`, {
+      maxRedirections: 5,
+    });
+    const body = await res.body.json();
+    return body.version + '';
+  }
+}
+
+/**
  * @param {DownloadOptions} options
  */
-async function downloadLinux({ version, skipVerify }) {
+async function downloadLinux({ version, toolVersion, skipVerify }) {
   version = version || 'git';
   const arch = getLinuxArch();
   external_assert_default().ok(arch, UNSUPPORTED_PLATFORM);
@@ -52998,19 +53021,13 @@ async function downloadLinux({ version, skipVerify }) {
   const dirs = await (0,external_fs_promises_namespaceObject.readdir)(extractPath);
   const dir = external_path_default().join(extractPath, dirs.filter((name) => name.startsWith('ffmpeg-'))[0]);
 
-  // Report the correct version (or git commit) so that caching can be effective
-  if (version === 'git' || version === 'release') {
-    const readme = await (0,external_fs_promises_namespaceObject.readFile)(external_path_default().join(dir, 'readme.txt'), 'utf8');
-    version = readme.match(/version\: (.+)\n/)[1].trim() || version;
-  }
-
-  return await tool_cache.cacheDir(dir, 'ffmpeg', version);
+  return await tool_cache.cacheDir(dir, 'ffmpeg', toolVersion);
 }
 
 /**
  * @param {DownloadOptions} options
  */
-async function downloadWindows({ version, skipVerify }) {
+async function downloadWindows({ version, toolVersion, skipVerify }) {
   external_assert_default().strictEqual(external_os_.arch(), 'x64', UNSUPPORTED_PLATFORM);
   let tool;
   if (version === 'git' || version === 'release') {
@@ -53035,22 +53052,19 @@ async function downloadWindows({ version, skipVerify }) {
     version = readme.match(/Version\: (.+)\n/)[1].trim().replace(/-full_build-www\.gyan\.dev$/) || version;
   }
 
-  return await tool_cache.cacheDir(external_path_default().join(dir, 'bin'), 'ffmpeg', version);
+  return await tool_cache.cacheDir(external_path_default().join(dir, 'bin'), 'ffmpeg', toolVersion);
 }
 
 /**
  * @param {DownloadOptions} options
  */
-async function downloadMac({ version, skipVerify }) {
+async function downloadMac({ version, toolVersion, skipVerify }) {
   external_assert_default().strictEqual(external_os_.arch(), 'x64', UNSUPPORTED_PLATFORM);
   let ffmpeg;
   let ffprobe;
-  if (version === 'git') {
-    ffmpeg = 'https://evermeet.cx/ffmpeg/get/zip';
-    ffprobe = 'https://evermeet.cx/ffmpeg/get/ffprobe/zip';
-  } else if (version === 'release') {
-    ffmpeg = 'https://evermeet.cx/ffmpeg/getrelease/zip';
-    ffprobe = 'https://evermeet.cx/ffmpeg/getrelease/ffprobe/zip';
+  if (version === 'git' || version === 'release') {
+    ffmpeg = `https://evermeet.cx/ffmpeg/get${version === 'release' ? version : ''}/zip`;
+    ffprobe = `https://evermeet.cx/ffmpeg/get${version === 'release' ? version : ''}/ffprobe/zip`;
   } else {
     ffmpeg = `https://evermeet.cx/ffmpeg/ffmpeg-${version}.zip`;
     ffprobe = `https://evermeet.cx/ffmpeg/ffprobe-${version}.zip`;
@@ -53078,7 +53092,7 @@ async function downloadMac({ version, skipVerify }) {
   await (0,external_fs_promises_namespaceObject.mkdir)(combinedPath);
   await (0,external_fs_promises_namespaceObject.rename)(external_path_default().join(ffmpegExtractPath, 'ffmpeg'), external_path_default().join(combinedPath, 'ffmpeg'));
   await (0,external_fs_promises_namespaceObject.rename)(external_path_default().join(ffprobeExtractPath, 'ffprobe'), external_path_default().join(combinedPath, 'ffprobe'));
-  return await tool_cache.cacheDir(combinedPath, 'ffmpeg', version);
+  return await tool_cache.cacheDir(combinedPath, 'ffmpeg', toolVersion);
 }
 
 const PLATFORMS = new Set(['linux', 'win32', 'darwin']);
@@ -53087,7 +53101,7 @@ const PLATFORMS = new Set(['linux', 'win32', 'darwin']);
  * Download ffmpeg.
  * @param {DownloadOptions} options
  */
-async function download(options = {}) {
+async function download(options) {
   const platform = external_os_.platform();
   external_assert_default().ok(PLATFORMS.has(platform), UNSUPPORTED_PLATFORM);
   if (platform === 'linux') {
@@ -53110,32 +53124,26 @@ async function download(options = {}) {
 
 
 
-const action_PLATFORMS = new Set(['linux', 'win32', 'darwin']);
-
 // Sets the file as executable acts like chmod +x $path
 const chmodx = (path) => external_fs_.promises.chmod(path, '755');
 
 async function main() {
   try {
-    const platform = external_os_.platform();
-    const arch = external_os_.arch();
-
-    // Check if the current platform and architecture are supported
-    external_assert_.ok(action_PLATFORMS.has(platform), `setup-ffmpeg cannot be run on ${platform}`);
-    external_assert_.strictEqual(arch, 'x64', 'setup-ffmpeg can only be run on 64-bit systems');
-
     // const token = [process.env.INPUT_TOKEN, process.env.INPUT_GITHUB_TOKEN, process.env.GITHUB_TOKEN]
     //   .filter((token) => token)[0];
 
     const version = core.getInput('version');
 
+    const toolVersion = version === 'git' || version === 'release' ? getToolVersion(version) : version;
+
     // Search in the cache if version is already installed
-    let installPath = tool_cache.find('ffmpeg', version, arch);
+    let installPath = tool_cache.find('ffmpeg', toolVersion);
 
     // If ffmpeg was not found in cache download it from releases
     if (!installPath) {
       installPath = await download({
         version,
+        toolVersion,
         skipVerify: false,
       });
     }

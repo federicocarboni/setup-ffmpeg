@@ -14,7 +14,8 @@ import { md5sum, sha256sum, verifyGpgSig, temp } from './integrity';
  * @typedef {object} DownloadOptions
  * @property {string} version FFmpeg version, i.e. 6.1.0, git (for git master
  *  builds), release (for latest release builds)
- * @property {boolean} skipVerify Skip verifying signatures of downloaded files
+ * @property {string} toolVersion version to use for tool caching
+ * @property {boolean} skipVerify Skip verifying signatures/hashes of downloaded files
  */
 
 const UNSUPPORTED_PLATFORM = 'Unsupported platform/architecture combination';
@@ -41,9 +42,31 @@ async function downloadToFile(url, file) {
 }
 
 /**
+ *
+ * @param {'git' | 'release'} version
+ * @returns {string}
+ */
+export async function getToolVersion(version) {
+  const platform = os.platform();
+  if (platform === 'linux') {
+    const readme = await downloadText(`https://johnvansickle.com/ffmpeg/${version === 'git' ? 'git-' : ''}readme.txt`);
+    return readme.match(/version\: (.+)\n/)[1].trim()
+  } else if (platform === 'win32') {
+    const ver = await downloadText(`https://www.gyan.dev/ffmpeg/builds/${version}-version`);
+    return ver.trim();
+  } else if (platform === 'darwin') {
+    const res = await http.request(`https://evermeet.cx/ffmpeg/info/ffmpeg/${version === 'git' ? 'snapshot' : 'release'}`, {
+      maxRedirections: 5,
+    });
+    const body = await res.body.json();
+    return body.version + '';
+  }
+}
+
+/**
  * @param {DownloadOptions} options
  */
-async function downloadLinux({ version, skipVerify }) {
+async function downloadLinux({ version, toolVersion, skipVerify }) {
   version = version || 'git';
   const arch = getLinuxArch();
   assert.ok(arch, UNSUPPORTED_PLATFORM);
@@ -59,19 +82,13 @@ async function downloadLinux({ version, skipVerify }) {
   const dirs = await readdir(extractPath);
   const dir = path.join(extractPath, dirs.filter((name) => name.startsWith('ffmpeg-'))[0]);
 
-  // Report the correct version (or git commit) so that caching can be effective
-  if (version === 'git' || version === 'release') {
-    const readme = await readFile(path.join(dir, 'readme.txt'), 'utf8');
-    version = readme.match(/version\: (.+)\n/)[1].trim() || version;
-  }
-
-  return await tc.cacheDir(dir, 'ffmpeg', version);
+  return await tc.cacheDir(dir, 'ffmpeg', toolVersion);
 }
 
 /**
  * @param {DownloadOptions} options
  */
-async function downloadWindows({ version, skipVerify }) {
+async function downloadWindows({ version, toolVersion, skipVerify }) {
   assert.strictEqual(os.arch(), 'x64', UNSUPPORTED_PLATFORM);
   let tool;
   if (version === 'git' || version === 'release') {
@@ -96,22 +113,19 @@ async function downloadWindows({ version, skipVerify }) {
     version = readme.match(/Version\: (.+)\n/)[1].trim().replace(/-full_build-www\.gyan\.dev$/) || version;
   }
 
-  return await tc.cacheDir(path.join(dir, 'bin'), 'ffmpeg', version);
+  return await tc.cacheDir(path.join(dir, 'bin'), 'ffmpeg', toolVersion);
 }
 
 /**
  * @param {DownloadOptions} options
  */
-async function downloadMac({ version, skipVerify }) {
+async function downloadMac({ version, toolVersion, skipVerify }) {
   assert.strictEqual(os.arch(), 'x64', UNSUPPORTED_PLATFORM);
   let ffmpeg;
   let ffprobe;
-  if (version === 'git') {
-    ffmpeg = 'https://evermeet.cx/ffmpeg/get/zip';
-    ffprobe = 'https://evermeet.cx/ffmpeg/get/ffprobe/zip';
-  } else if (version === 'release') {
-    ffmpeg = 'https://evermeet.cx/ffmpeg/getrelease/zip';
-    ffprobe = 'https://evermeet.cx/ffmpeg/getrelease/ffprobe/zip';
+  if (version === 'git' || version === 'release') {
+    ffmpeg = `https://evermeet.cx/ffmpeg/get${version === 'release' ? version : ''}/zip`;
+    ffprobe = `https://evermeet.cx/ffmpeg/get${version === 'release' ? version : ''}/ffprobe/zip`;
   } else {
     ffmpeg = `https://evermeet.cx/ffmpeg/ffmpeg-${version}.zip`;
     ffprobe = `https://evermeet.cx/ffmpeg/ffprobe-${version}.zip`;
@@ -139,7 +153,7 @@ async function downloadMac({ version, skipVerify }) {
   await mkdir(combinedPath);
   await rename(path.join(ffmpegExtractPath, 'ffmpeg'), path.join(combinedPath, 'ffmpeg'));
   await rename(path.join(ffprobeExtractPath, 'ffprobe'), path.join(combinedPath, 'ffprobe'));
-  return await tc.cacheDir(combinedPath, 'ffmpeg', version);
+  return await tc.cacheDir(combinedPath, 'ffmpeg', toolVersion);
 }
 
 const PLATFORMS = new Set(['linux', 'win32', 'darwin']);
@@ -148,7 +162,7 @@ const PLATFORMS = new Set(['linux', 'win32', 'darwin']);
  * Download ffmpeg.
  * @param {DownloadOptions} options
  */
-export async function download(options = {}) {
+export async function download(options) {
   const platform = os.platform();
   assert.ok(PLATFORMS.has(platform), UNSUPPORTED_PLATFORM);
   if (platform === 'linux') {
