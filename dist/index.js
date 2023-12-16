@@ -53150,7 +53150,7 @@ async function main() {
 
     external_assert_.ok(installPath);
 
-    const ext = platform === 'win32' ? '.exe' : '';
+    const ext = external_os_.platform() === 'win32' ? '.exe' : '';
     const ffmpegPath = external_path_.join(installPath, `ffmpeg${ext}`);
     const ffprobePath = external_path_.join(installPath, `ffprobe${ext}`);
 

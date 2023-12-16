@@ -34,7 +34,7 @@ async function main() {
 
     assert.ok(installPath);
 
-    const ext = platform === 'win32' ? '.exe' : '';
+    const ext = os.platform() === 'win32' ? '.exe' : '';
     const ffmpegPath = path.join(installPath, `ffmpeg${ext}`);
     const ffprobePath = path.join(installPath, `ffprobe${ext}`);
 
