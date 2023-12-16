@@ -53581,6 +53581,7 @@ var external_crypto_ = __nccwpck_require__(6113);
 
 
 
+
 function temp() {
   const tempDirectory = process.env['RUNNER_TEMP'] || '';
   external_assert_default().ok(tempDirectory, 'Expected RUNNER_TEMP to be defined');
@@ -53621,7 +53622,7 @@ async function sha256sum(file) {
  */
 async function verifyGpgSig(keyFile, sig, file) {
   // Create a temporary keyring to avoid polluting the default keyring
-  const keyring = external_path_default().join(temp(), keyFile + '.gpg');
+  const keyring = external_path_default().join(temp(), v4() + '.gpg');
   await (0,external_fs_promises_namespaceObject.mkdir)(external_path_default().join(process.env['HOME'], '.gnupg'), { recursive: true, mode: '700' });
   external_assert_default().ok(
     await (0,exec.exec)('gpg --no-default-keyring --keyring', [keyring, '--import', keyFile]) === 0,
