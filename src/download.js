@@ -1,5 +1,6 @@
 import * as tc from '@actions/tool-cache';
 import * as http from 'undici';
+import { v4 } from 'uuid';
 
 import assert from 'assert';
 import * as os from 'os';
@@ -133,23 +134,23 @@ async function downloadMac({ version, toolVersion, skipVerify }) {
   const ext = version === 'git' || version === 'release' ? '/sig' : '.sig';
   const ffmpegSig = ffmpeg + ext;
   const ffprobeSig = ffprobe + ext;
-  console.log(ffmpeg);
-  console.log(ffprobe);
   const ffmpegPath = path.join(temp(), `ffmpeg-${version}.zip`);
   const ffprobePath = path.join(temp(), `ffprobe-${version}.zip`);
   await downloadToFile(ffmpeg, ffmpegPath);
   await downloadToFile(ffprobe, ffprobePath);
   if (!skipVerify) {
-    const ffmpegSigFile = path.join(temp(), `ffmpeg-${version}.zip.sig`);
-    const ffprobeSigFile = path.join(temp(), `ffprobe-${version}.zip.sig`);
+    const ffmpegSigFile = path.join(temp(), v4());
+    const ffprobeSigFile = path.join(temp(), v4());
     await downloadToFile(ffmpegSig, ffmpegSigFile);
     await downloadToFile(ffprobeSig, ffprobeSigFile);
-    assert.ok(await verifyGpgSig('0x476C4B611A660874', ffmpegSigFile, ffmpegPath), VERIFICATION_FAIL);
-    assert.ok(await verifyGpgSig('0x476C4B611A660874', ffprobeSigFile, ffprobePath), VERIFICATION_FAIL);
+    const keyFile = path.join(temp(), v4());
+    await downloadToFile('https://evermeet.cx/ffmpeg/0x1A660874.asc', keyFile);
+    assert.ok(await verifyGpgSig(keyFile, ffmpegSigFile, ffmpegPath), VERIFICATION_FAIL);
+    assert.ok(await verifyGpgSig(keyFile, ffprobeSigFile, ffprobePath), VERIFICATION_FAIL);
   }
   const ffmpegExtractPath = await tc.extractZip(ffmpegPath);
   const ffprobeExtractPath = await tc.extractZip(ffprobePath);
-  const combinedPath = path.join(temp(), `ffmpeg-ffprobe-${version}`);
+  const combinedPath = path.join(temp(), v4());
   await mkdir(combinedPath);
   await rename(path.join(ffmpegExtractPath, 'ffmpeg'), path.join(combinedPath, 'ffmpeg'));
   await rename(path.join(ffprobeExtractPath, 'ffprobe'), path.join(combinedPath, 'ffprobe'));

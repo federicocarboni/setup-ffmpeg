@@ -40,17 +40,17 @@ export async function sha256sum(file) {
 /**
  * Verify a GPG signature.
  *
- * @param {string} keyId Key id used to sign the file
+ * @param {string} keyFile Key file used to check the file
  * @param {string} sig Path to the signature file
  * @param {string} file Path to the file to check
  * @returns {Promise<boolean>} true if the signature is valid
  */
-export async function verifyGpgSig(keyId, sig, file) {
+export async function verifyGpgSig(keyFile, sig, file) {
   // Create a temporary keyring to avoid polluting the default keyring
-  const keyring = path.join(temp(), keyId + '.gpg');
+  const keyring = path.join(temp(), keyFile + '.gpg');
   await mkdir(path.join(process.env['HOME'], '.gnupg'), { recursive: true, mode: '700' });
   assert.ok(
-    await exec('gpg --no-default-keyring --keyring', [keyring, '--recv-keys', keyId]) === 0,
+    await exec('gpg --no-default-keyring --keyring', [keyring, '--import', keyFile]) === 0,
     'Could not create temporary keyring to verify GPG signature'
   );
   const code = await exec('gpg --no-default-keyring --keyring', [keyring, '--verify', sig, file]);
