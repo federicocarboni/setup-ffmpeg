@@ -18,9 +18,7 @@ async function main() {
 
     const version = core.getInput('version');
 
-    const toolVersion = version === 'git' || version === 'release' ? getToolVersion(version) : version;
-
-    console.log(toolVersion);
+    const toolVersion = version === 'git' || version === 'release' ? await getToolVersion(version) : version;
 
     // Search in the cache if version is already installed
     let installPath = tc.find('ffmpeg', toolVersion);

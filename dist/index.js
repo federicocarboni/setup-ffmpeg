@@ -52983,7 +52983,7 @@ async function downloadToFile(url, file) {
 /**
  *
  * @param {'git' | 'release'} version
- * @returns {string}
+ * @returns {Promise<string>}
  */
 async function getToolVersion(version) {
   const platform = external_os_.platform();
@@ -53134,9 +53134,7 @@ async function main() {
 
     const version = core.getInput('version');
 
-    const toolVersion = version === 'git' || version === 'release' ? getToolVersion(version) : version;
-
-    console.log(toolVersion);
+    const toolVersion = version === 'git' || version === 'release' ? await getToolVersion(version) : version;
 
     // Search in the cache if version is already installed
     let installPath = tool_cache.find('ffmpeg', toolVersion);

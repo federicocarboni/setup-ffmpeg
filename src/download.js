@@ -44,7 +44,7 @@ async function downloadToFile(url, file) {
 /**
  *
  * @param {'git' | 'release'} version
- * @returns {string}
+ * @returns {Promise<string>}
  */
 export async function getToolVersion(version) {
   const platform = os.platform();
