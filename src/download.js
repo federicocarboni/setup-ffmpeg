@@ -9,7 +9,7 @@ import { createWriteStream } from 'fs';
 import path from 'path';
 import { mkdir, readFile, readdir, rename, unlink } from 'fs/promises';
 
-import { md5sum, sha256sum, verifyGpgSig, temp } from './integrity';
+import { md5sum, sha256sum, verifyGpgSig, getTempPath as getTempPath } from './integrity';
 
 /**
  * @typedef {object} DownloadOptions
@@ -43,7 +43,6 @@ async function downloadToFile(url, file) {
 }
 
 /**
- *
  * @param {string} version
  */
 function cleanVersion(version) {
@@ -58,21 +57,21 @@ function cleanVersion(version) {
 }
 
 /**
+ * Returns the latest version of ffmpeg depending on wanted release type.
  *
- * @param {'git' | 'release'} version
+ * @param {'git' | 'release'} releaseType
  * @returns {Promise<string>}
  */
-export async function getToolVersion(version) {
-  const prefix = version === 'git' ? '0.0.0-' : '';
+export async function getToolVersion(releaseType) {
   const platform = os.platform();
   if (platform === 'linux') {
-    const readme = await downloadText(`https://johnvansickle.com/ffmpeg/${version}-readme.txt`);
+    const readme = await downloadText(`https://johnvansickle.com/ffmpeg/${releaseType}-readme.txt`);
     return cleanVersion(readme.match(/version\: (.+)\n/)[1].trim());
   } else if (platform === 'win32') {
-    const ver = await downloadText(`https://www.gyan.dev/ffmpeg/builds/${version}-version`);
+    const ver = await downloadText(`https://www.gyan.dev/ffmpeg/builds/${releaseType}-version`);
     return cleanVersion(ver.trim());
   } else if (platform === 'darwin') {
-    const res = await http.request(`https://evermeet.cx/ffmpeg/info/ffmpeg/${version === 'git' ? 'snapshot' : 'release'}`, {
+    const res = await http.request(`https://evermeet.cx/ffmpeg/info/ffmpeg/${releaseType === 'git' ? 'snapshot' : 'release'}`, {
       maxRedirections: 5,
     });
     const body = await res.body.json();
@@ -91,7 +90,7 @@ async function downloadLinux({ version, toolVersion, skipVerify }) {
   const downloadPath = await tc.downloadTool(tool);
   if (!skipVerify) {
     const hash = (await downloadText(sig)).trimStart().split(' ')[0].trim();
-    assert.strictEqual(await md5sum(downloadPath), hash, VERIFICATION_FAIL);
+    assert.strictEqual(await md5sum(downloadPath), hash.toLowerCase(), VERIFICATION_FAIL);
   }
   const extractPath = await tc.extractTar(downloadPath, void 0, 'x');
   // Extract path contains a single directory
@@ -112,22 +111,15 @@ async function downloadWindows({ version, toolVersion, skipVerify }) {
   } else {
     tool = `https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-${version}-full_build.7z`;
   }
-  const sig = tool + '.sha256';
   const downloadPath = await tc.downloadTool(tool);
   if (!skipVerify) {
-    const hash = await downloadText(sig);
-    assert.strictEqual(await sha256sum(downloadPath), hash, VERIFICATION_FAIL);
+    const hash = await downloadText(tool + '.sha256');
+    assert.strictEqual(await sha256sum(downloadPath), hash.toLowerCase(), VERIFICATION_FAIL);
   }
   const extractPath = await tc.extract7z(downloadPath, void 0, path.join(__dirname, '..', 'scripts', '7zr.exe'));
   // Extract path contains a single directory
   const dirs = await readdir(extractPath);
   const dir = path.join(extractPath, dirs.filter((name) => name.startsWith('ffmpeg-'))[0]);
-
-  // Report the correct version (or git commit) so that caching can be effective
-  if (version === 'git' || version === 'release') {
-    const readme = await readFile(path.join(dir, 'README.txt'), 'utf8');
-    version = readme.match(/Version\: (.+)\n/)[1].trim().replace(/-full_build-www\.gyan\.dev$/) || version;
-  }
 
   return await tc.cacheDir(path.join(dir, 'bin'), 'ffmpeg', toolVersion);
 }
@@ -137,6 +129,9 @@ async function downloadWindows({ version, toolVersion, skipVerify }) {
  */
 async function downloadMac({ version, toolVersion, skipVerify }) {
   assert.strictEqual(os.arch(), 'x64', UNSUPPORTED_PLATFORM);
+  // Mac ffmpeg and ffprobe binaries are in different archives that need to be
+  // downloaded separately. We use .zip files because 7zip is not available on
+  // macos runners.
   let ffmpeg;
   let ffprobe;
   if (version === 'git' || version === 'release') {
@@ -146,19 +141,21 @@ async function downloadMac({ version, toolVersion, skipVerify }) {
     ffmpeg = `https://evermeet.cx/ffmpeg/ffmpeg-${version}.zip`;
     ffprobe = `https://evermeet.cx/ffmpeg/ffprobe-${version}.zip`;
   }
-  const ext = version === 'git' || version === 'release' ? '/sig' : '.sig';
-  const ffmpegSig = ffmpeg + ext;
-  const ffprobeSig = ffprobe + ext;
-  const ffmpegPath = path.join(temp(), `ffmpeg-${version}.zip`);
-  const ffprobePath = path.join(temp(), `ffprobe-${version}.zip`);
+  const ffmpegPath = getTempPath();
+  const ffprobePath = getTempPath();
+  // tc.downloadTool() is bugged and chokes on redirects
   await downloadToFile(ffmpeg, ffmpegPath);
   await downloadToFile(ffprobe, ffprobePath);
   if (!skipVerify) {
-    const ffmpegSigFile = path.join(temp(), v4());
-    const ffprobeSigFile = path.join(temp(), v4());
+    const ext = version === 'git' || version === 'release' ? '/sig' : '.sig';
+    const ffmpegSig = ffmpeg + ext;
+    const ffprobeSig = ffprobe + ext;
+    const ffmpegSigFile = getTempPath();
+    const ffprobeSigFile = getTempPath();
     await downloadToFile(ffmpegSig, ffmpegSigFile);
     await downloadToFile(ffprobeSig, ffprobeSigFile);
-    const keyFile = path.join(temp(), v4());
+    const keyFile = getTempPath();
+    // Download the key to check the files' signatures
     await downloadToFile('https://evermeet.cx/ffmpeg/0x1A660874.asc', keyFile);
     assert.ok(await verifyGpgSig(keyFile, ffmpegSigFile, ffmpegPath), VERIFICATION_FAIL);
     assert.ok(await verifyGpgSig(keyFile, ffprobeSigFile, ffprobePath), VERIFICATION_FAIL);
@@ -168,7 +165,7 @@ async function downloadMac({ version, toolVersion, skipVerify }) {
   }
   const ffmpegExtractPath = await tc.extractZip(ffmpegPath);
   const ffprobeExtractPath = await tc.extractZip(ffprobePath);
-  const combinedPath = path.join(temp(), v4());
+  const combinedPath = getTempPath();
   await mkdir(combinedPath);
   await rename(path.join(ffmpegExtractPath, 'ffmpeg'), path.join(combinedPath, 'ffmpeg'));
   await rename(path.join(ffprobeExtractPath, 'ffprobe'), path.join(combinedPath, 'ffprobe'));
