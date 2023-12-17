@@ -24,3 +24,14 @@ jobs:
         uses: ./
       - run: ffmpeg -version
       - run: ffprobe -version
+      - name: Run FedericoCarboni/setup-ffmpeg
+        uses: ./
+        with:
+          version: release
+      - name: Run FedericoCarboni/setup-ffmpeg
+        id: setup-ffmpeg1
+        uses: ./
+        with:
+          version: release
+      - run: ffmpeg -version
+      - run: ffprobe -version
