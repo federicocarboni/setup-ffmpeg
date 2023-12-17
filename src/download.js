@@ -9,7 +9,7 @@ import { createWriteStream } from 'fs';
 import path from 'path';
 import { mkdir, readFile, readdir, rename, unlink } from 'fs/promises';
 
-import { md5sum, sha256sum, verifyGpgSig, getTempPath as getTempPath } from './integrity';
+import { md5sum, sha256sum, verifyGpgSig, getTempPath } from './integrity';
 
 /**
  * @typedef {object} DownloadOptions
