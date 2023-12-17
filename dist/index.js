@@ -53720,10 +53720,9 @@ async function getToolVersion(version) {
  * @param {DownloadOptions} options
  */
 async function downloadLinux({ version, toolVersion, skipVerify }) {
-  version = version || 'git';
   const arch = getLinuxArch();
   external_assert_default().ok(arch, UNSUPPORTED_PLATFORM);
-  const tool = `https://johnvansickle.com/ffmpeg/builds/ffmpeg-${version}-${arch}-static.tar.xz`;
+  const tool = `https://johnvansickle.com/ffmpeg/${version === 'git' ? 'builds' : 'releases'}/ffmpeg-${version}-${arch}-static.tar.xz`;
   const sig = tool + '.md5';
   const downloadPath = await tool_cache.downloadTool(tool);
   if (!skipVerify) {
