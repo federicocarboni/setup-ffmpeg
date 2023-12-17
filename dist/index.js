@@ -53680,6 +53680,21 @@ async function downloadToFile(url, file) {
 
 /**
  *
+ * @param {string} version
+ */
+function cleanVersion(version) {
+  version = version.trim();
+  if (version.match(/^([0-9]+)\.([0-9]+)(\.[0-9]+(-.+)?)?$/)) {
+    let [major, minor, ...patch] = version.split('.');
+    if (patch.length === 0) patch = ['0'];
+    return [major, minor, ...patch].join('.');
+  } else {
+    return '0.0.0-' + version;
+  }
+}
+
+/**
+ *
  * @param {'git' | 'release'} version
  * @returns {Promise<string>}
  */
@@ -53687,17 +53702,17 @@ async function getToolVersion(version) {
   const prefix = version === 'git' ? '0.0.0-' : '';
   const platform = external_os_.platform();
   if (platform === 'linux') {
-    const readme = await downloadText(`https://johnvansickle.com/ffmpeg/${version === 'git' ? 'git-' : ''}readme.txt`);
-    return prefix + readme.match(/version\: (.+)\n/)[1].trim()
+    const readme = await downloadText(`https://johnvansickle.com/ffmpeg/${version}-readme.txt`);
+    return cleanVersion(readme.match(/version\: (.+)\n/)[1].trim());
   } else if (platform === 'win32') {
     const ver = await downloadText(`https://www.gyan.dev/ffmpeg/builds/${version}-version`);
-    return prefix + ver.trim();
+    return cleanVersion(ver.trim());
   } else if (platform === 'darwin') {
     const res = await undici/* request */.WY(`https://evermeet.cx/ffmpeg/info/ffmpeg/${version === 'git' ? 'snapshot' : 'release'}`, {
       maxRedirections: 5,
     });
     const body = await res.body.json();
-    return prefix + body.version;
+    return cleanVersion(body.version);
   }
 }
 
