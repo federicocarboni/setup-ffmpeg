@@ -53684,19 +53684,20 @@ async function downloadToFile(url, file) {
  * @returns {Promise<string>}
  */
 async function getToolVersion(version) {
+  const prefix = version === 'git' ? '0.0.0-' : '';
   const platform = external_os_.platform();
   if (platform === 'linux') {
     const readme = await downloadText(`https://johnvansickle.com/ffmpeg/${version === 'git' ? 'git-' : ''}readme.txt`);
-    return readme.match(/version\: (.+)\n/)[1].trim()
+    return prefix + readme.match(/version\: (.+)\n/)[1].trim()
   } else if (platform === 'win32') {
     const ver = await downloadText(`https://www.gyan.dev/ffmpeg/builds/${version}-version`);
-    return ver.trim();
+    return prefix + ver.trim();
   } else if (platform === 'darwin') {
     const res = await undici/* request */.WY(`https://evermeet.cx/ffmpeg/info/ffmpeg/${version === 'git' ? 'snapshot' : 'release'}`, {
       maxRedirections: 5,
     });
     const body = await res.body.json();
-    return body.version + '';
+    return prefix + body.version;
   }
 }
 
