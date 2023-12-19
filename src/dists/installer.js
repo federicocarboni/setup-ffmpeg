@@ -77,8 +77,8 @@ export async function install(options) {
   }
   const toolInstallDir = tc.find(options.toolCacheDir, version);
   if (toolInstallDir) {
-    core.info(`Using ffmpeg version ${release.version} from tool cache`);
-    return {toolInstallDir, version: version};
+    core.info(`Using ffmpeg version ${version} from tool cache`);
+    return {toolInstallDir, version};
   }
   if (!release) release = await getRelease(installer, options);
   core.info(`Installing ffmpeg version ${release.version} from ${release.downloadUrl}`);
