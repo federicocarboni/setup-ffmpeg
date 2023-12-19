@@ -16,7 +16,7 @@ steps:
     id: setup-ffmpeg
     with:
       # A specific version to download, may also be "release" or a specific version
-      # like "6.1". At the moment semver specifiers (i.e. >=6.1.0)  are supported
+      # like "6.1.0". At the moment semver specifiers (i.e. >=6.1.0)  are supported
       # only on Windows, on other platforms the version is matched exactly.
       # As of version 3, this action -- by default -- uses the latest release version
       # available for the platform. As upstream sources are not guaranteed to update
