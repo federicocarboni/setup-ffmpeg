@@ -7,7 +7,7 @@ import * as semver from 'semver';
 import {fetch} from 'undici';
 import {v4 as uuidV4} from 'uuid';
 
-import {USER_AGENT, getTempDir, normalizeVersion} from '../util';
+import {USER_AGENT, cleanVersion, getTempDir, normalizeVersion} from '../util';
 
 export class EvermeetCxInstaller {
   /**
@@ -73,7 +73,7 @@ export class EvermeetCxInstaller {
   async getAvailableReleases() {
     const releases = [await this.getLatestRelease()];
     if (this.version.toLowerCase() !== 'git' && this.version.toLowerCase() !== 'release') {
-      const release = await this.getRelease(semver.clean(this.version) || this.version, false);
+      const release = await this.getRelease(cleanVersion(this.version), false);
       if (release && releases[0].version !== release.version) releases.push(release);
     }
     return releases;

@@ -16,8 +16,8 @@ export function getTempDir() {
  * Normalizes a version string loosely in the format `X.X.X-abc` (version may
  * not contain all of these parts) to a valid semver version.
  *
- * @param {string} version
- * @param {boolean} isGitBuild
+ * @param version {string}
+ * @param isGitBuild {boolean}
  * @returns {string | null}
  */
 export function normalizeVersion(version, isGitBuild) {
@@ -38,11 +38,13 @@ export function normalizeVersion(version, isGitBuild) {
 }
 
 /**
+ * Clean up a version to use to match requested versions on johnvansickle.com and
+ * evermeet.cx.
  *
- *
- * @param {string} version
- * @param {string} spec
+ * @param version {string}
+ * @returns {string}
  */
-export function isVersionSatisfies(version, spec) {
-  return semver.satisfies(version, spec);
+export function cleanVersion(version) {
+  const clean = semver.clean(version);
+  return (clean && clean.replace(/\.0+$/, '')) || version;
 }

@@ -5,7 +5,7 @@ import * as core from '@actions/core';
 import * as semver from 'semver';
 import {fetch} from 'undici';
 
-import {USER_AGENT, normalizeVersion} from '../util';
+import {USER_AGENT, cleanVersion, normalizeVersion} from '../util';
 import {createReadStream} from 'fs';
 import {createHash} from 'crypto';
 import {pipeline} from 'stream/promises';
@@ -56,7 +56,7 @@ export class JohnVanSickleInstaller {
    * @returns {Promise<import('./installer').ReleaseInfo?>}
    */
   async getRelease() {
-    const version = semver.clean(this.version) || this.version;
+    const version = cleanVersion(this.version);
     /** @type {import('undici').RequestInit} */
     const init = {
       method: 'HEAD',
