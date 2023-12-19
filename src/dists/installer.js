@@ -72,7 +72,7 @@ export async function install(options) {
   let release;
   let version = options.version;
   if (version.toLowerCase() === 'git' || version.toLowerCase() === 'release') {
-    release = await getRelease(installer, options);
+    release = await installer.getLatestRelease();
     version = release.version;
   }
   const toolInstallDir = tc.find(options.toolCacheDir, version);
