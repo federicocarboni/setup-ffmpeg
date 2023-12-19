@@ -20,18 +20,26 @@ jobs:
       - name: Run FedericoCarboni/setup-ffmpeg
         uses: ./
       - name: Run FedericoCarboni/setup-ffmpeg
-        id: setup-ffmpeg
         uses: ./
       - run: ffmpeg -version
       - run: ffprobe -version
       - name: Run FedericoCarboni/setup-ffmpeg
         uses: ./
         with:
-          version: release
+          ffmpeg-version: git
       - name: Run FedericoCarboni/setup-ffmpeg
-        id: setup-ffmpeg1
         uses: ./
         with:
-          version: release
+          ffmpeg-version: git
+      - run: ffmpeg -version
+      - run: ffprobe -version
+      - name: Run FedericoCarboni/setup-ffmpeg
+        uses: ./
+        with:
+          ffmpeg-version: 5.1.2
+      - name: Run FedericoCarboni/setup-ffmpeg
+        uses: ./
+        with:
+          ffmpeg-version: 5.1.2
       - run: ffmpeg -version
       - run: ffprobe -version
