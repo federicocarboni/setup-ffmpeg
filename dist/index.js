@@ -58223,10 +58223,10 @@ const promises_namespaceObject = require("fs/promises");
 var core = __nccwpck_require__(9093);
 // EXTERNAL MODULE: ./node_modules/.pnpm/@actions+exec@1.1.1/node_modules/@actions/exec/lib/exec.js
 var exec = __nccwpck_require__(7775);
-// EXTERNAL MODULE: ./node_modules/.pnpm/semver@7.5.4/node_modules/semver/index.js
-var semver = __nccwpck_require__(1026);
 // EXTERNAL MODULE: ./node_modules/.pnpm/@actions+tool-cache@2.0.1/node_modules/@actions/tool-cache/lib/tool-cache.js
 var tool_cache = __nccwpck_require__(5561);
+// EXTERNAL MODULE: ./node_modules/.pnpm/semver@7.5.4/node_modules/semver/index.js
+var semver = __nccwpck_require__(1026);
 // EXTERNAL MODULE: ./node_modules/.pnpm/@octokit+core@5.0.2/node_modules/@octokit/core/dist-node/index.js
 var dist_node = __nccwpck_require__(807);
 // EXTERNAL MODULE: ./node_modules/.pnpm/undici@6.0.1/node_modules/undici/index.js
@@ -58658,6 +58658,7 @@ class EvermeetCxInstaller {
 
 
 
+
 /**
  * @typedef {object} InstallerOptions
  * @property {string} version
@@ -58696,16 +58697,12 @@ function getInstaller(options) {
   }
   external_assert_.ok(false, 'Unsupported platform');
 }
+
 /**
+ * @param installer {ReturnType<getInstaller>}
  * @param options {InstallerOptions}
  */
-async function install(options) {
-  const installer = getInstaller(options);
-  if (options.version.toLowerCase() === 'git' || options.version.toLowerCase() === 'release') {
-    const release = await installer.getLatestRelease();
-    core.info(`Installing ffmpeg version ${release.version} from ${release.downloadUrl}`);
-    return await installer.downloadTool(release);
-  }
+async function getRelease(installer, options) {
   const releases = await installer.getAvailableReleases();
   const installVer = semver.maxSatisfying(
     releases.map(({version}) => version),
@@ -58713,6 +58710,27 @@ async function install(options) {
   );
   const release = releases.find(({version}) => version === installVer);
   external_assert_.ok(release, 'Requested version is not available');
+  return release;
+}
+
+/**
+ * @param options {InstallerOptions}
+ * @returns {Promise<InstalledTool>}
+ */
+async function install(options) {
+  const installer = getInstaller(options);
+  let release;
+  let version = options.version;
+  if (version.toLowerCase() === 'git' || version.toLowerCase() === 'release') {
+    release = await getRelease(installer, options);
+    version = release.version;
+  }
+  const toolInstallDir = tool_cache.find(options.toolCacheDir, version);
+  if (toolInstallDir) {
+    core.info(`Using ffmpeg version ${release.version} from tool cache`);
+    return {toolInstallDir, version: version};
+  }
+  if (!release) release = await getRelease(installer, options);
   core.info(`Installing ffmpeg version ${release.version} from ${release.downloadUrl}`);
   return await installer.downloadTool(release);
 }

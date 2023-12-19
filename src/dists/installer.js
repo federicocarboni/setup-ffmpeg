@@ -1,6 +1,7 @@
 import * as assert from 'assert';
 import * as os from 'os';
 
+import * as tc from '@actions/tool-cache';
 import * as core from '@actions/core';
 import * as semver from 'semver';
 
@@ -46,16 +47,12 @@ function getInstaller(options) {
   }
   assert.ok(false, 'Unsupported platform');
 }
+
 /**
+ * @param installer {ReturnType<getInstaller>}
  * @param options {InstallerOptions}
  */
-export async function install(options) {
-  const installer = getInstaller(options);
-  if (options.version.toLowerCase() === 'git' || options.version.toLowerCase() === 'release') {
-    const release = await installer.getLatestRelease();
-    core.info(`Installing ffmpeg version ${release.version} from ${release.downloadUrl}`);
-    return await installer.downloadTool(release);
-  }
+async function getRelease(installer, options) {
   const releases = await installer.getAvailableReleases();
   const installVer = semver.maxSatisfying(
     releases.map(({version}) => version),
@@ -63,6 +60,27 @@ export async function install(options) {
   );
   const release = releases.find(({version}) => version === installVer);
   assert.ok(release, 'Requested version is not available');
+  return release;
+}
+
+/**
+ * @param options {InstallerOptions}
+ * @returns {Promise<InstalledTool>}
+ */
+export async function install(options) {
+  const installer = getInstaller(options);
+  let release;
+  let version = options.version;
+  if (version.toLowerCase() === 'git' || version.toLowerCase() === 'release') {
+    release = await getRelease(installer, options);
+    version = release.version;
+  }
+  const toolInstallDir = tc.find(options.toolCacheDir, version);
+  if (toolInstallDir) {
+    core.info(`Using ffmpeg version ${release.version} from tool cache`);
+    return {toolInstallDir, version: version};
+  }
+  if (!release) release = await getRelease(installer, options);
   core.info(`Installing ffmpeg version ${release.version} from ${release.downloadUrl}`);
   return await installer.downloadTool(release);
 }
