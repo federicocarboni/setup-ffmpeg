@@ -1,10 +1,13 @@
-name: Setup FFmpeg
-description: Setup FFmpeg in GitHub Actions
+name: Setup ffmpeg
+description: Setup ffmpeg in GitHub Actions
 
 inputs:
-  version:
+  ffmpeg-version:
     required: false
-    default: git
+    default: release
+  github-token:
+    required: false
+    default: ${{ github.token }}
 
 runs:
   using: node20
