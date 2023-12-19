@@ -6,7 +6,7 @@ import * as semver from 'semver';
 import * as pkg from '../package.json';
 
 export const USER_AGENT = `${pkg.name}/${pkg.version}`;
-export const _7ZR_PATH = path.join(__dirname, '..', '..', 'scripts', '7zr.exe');
+export const _7ZR_PATH = path.join(__dirname, '..', 'scripts', '7zr.exe');
 
 export function getTempDir() {
   return process.env['RUNNER_TEMP'] || os.tmpdir();

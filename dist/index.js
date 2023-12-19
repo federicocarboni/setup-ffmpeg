@@ -58242,7 +58242,7 @@ const package_namespaceObject = JSON.parse('{"u2":"setup-ffmpeg","i8":"3.0.0"}')
 
 
 const USER_AGENT = `${package_namespaceObject.u2}/${package_namespaceObject.i8}`;
-const _7ZR_PATH = external_path_.join(__dirname, '..', '..', 'scripts', '7zr.exe');
+const _7ZR_PATH = __nccwpck_require__.ab + "7zr.exe";
 
 function getTempDir() {
   return process.env['RUNNER_TEMP'] || external_os_.tmpdir();
