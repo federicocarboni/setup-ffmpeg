@@ -36,10 +36,10 @@ jobs:
       - name: Run FedericoCarboni/setup-ffmpeg
         uses: ./
         with:
-          ffmpeg-version: '5.1.2'
+          ffmpeg-version: '5.1.1'
       - name: Run FedericoCarboni/setup-ffmpeg
         uses: ./
         with:
-          ffmpeg-version: '5.1.2'
+          ffmpeg-version: '5.1.1'
       - run: ffmpeg -version
       - run: ffprobe -version
