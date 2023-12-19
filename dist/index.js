@@ -58211,18 +58211,20 @@ var __webpack_exports__ = {};
 // ESM COMPAT FLAG
 __nccwpck_require__.r(__webpack_exports__);
 
-// EXTERNAL MODULE: external "os"
-var external_os_ = __nccwpck_require__(2037);
-// EXTERNAL MODULE: ./node_modules/.pnpm/@actions+core@1.10.1/node_modules/@actions/core/lib/core.js
-var core = __nccwpck_require__(9093);
 // EXTERNAL MODULE: external "assert"
 var external_assert_ = __nccwpck_require__(9491);
-// EXTERNAL MODULE: ./node_modules/.pnpm/semver@7.5.4/node_modules/semver/index.js
-var node_modules_semver = __nccwpck_require__(1026);
 // EXTERNAL MODULE: external "path"
 var external_path_ = __nccwpck_require__(1017);
+// EXTERNAL MODULE: external "os"
+var external_os_ = __nccwpck_require__(2037);
 ;// CONCATENATED MODULE: external "fs/promises"
 const promises_namespaceObject = require("fs/promises");
+// EXTERNAL MODULE: ./node_modules/.pnpm/@actions+core@1.10.1/node_modules/@actions/core/lib/core.js
+var core = __nccwpck_require__(9093);
+// EXTERNAL MODULE: ./node_modules/.pnpm/@actions+exec@1.1.1/node_modules/@actions/exec/lib/exec.js
+var exec = __nccwpck_require__(7775);
+// EXTERNAL MODULE: ./node_modules/.pnpm/semver@7.5.4/node_modules/semver/index.js
+var semver = __nccwpck_require__(1026);
 // EXTERNAL MODULE: ./node_modules/.pnpm/@actions+tool-cache@2.0.1/node_modules/@actions/tool-cache/lib/tool-cache.js
 var tool_cache = __nccwpck_require__(5561);
 // EXTERNAL MODULE: ./node_modules/.pnpm/@octokit+core@5.0.2/node_modules/@octokit/core/dist-node/index.js
@@ -58250,16 +58252,16 @@ function getTempDir() {
  * Normalizes a version string loosely in the format `X.X.X-abc` (version may
  * not contain all of these parts) to a valid semver version.
  *
- * @param {string} version
- * @param {boolean} isGitBuild
+ * @param version {string}
+ * @param isGitBuild {boolean}
  * @returns {string | null}
  */
 function normalizeVersion(version, isGitBuild) {
   // Git builds have no version because they are not the same branch as releases
   // they mostly use git commits, build dates or numbers instead of a semver
   // version
-  if (isGitBuild) return node_modules_semver.valid('0.0.0-' + version);
-  const valid = node_modules_semver.valid(version);
+  if (isGitBuild) return semver.valid('0.0.0-' + version);
+  const valid = semver.valid(version);
   if (valid) return valid;
   // Fix versions like x.y which are not valid with semver.
   const [ver, ...extra] = version.split('-');
@@ -58268,17 +58270,19 @@ function normalizeVersion(version, isGitBuild) {
   if (patch.length === 0) patch = ['0'];
   const normalized =
     [major, minor, ...patch].join('.') + (extra.length !== 0 ? '-' + extra.join('-') : '');
-  return node_modules_semver.valid(normalized);
+  return semver.valid(normalized);
 }
 
 /**
+ * Clean up a version to use to match requested versions on johnvansickle.com and
+ * evermeet.cx.
  *
- *
- * @param {string} version
- * @param {string} spec
+ * @param version {string}
+ * @returns {string}
  */
-function isVersionSatisfies(version, spec) {
-  return semver.satisfies(version, spec);
+function cleanVersion(version) {
+  const clean = semver.clean(version);
+  return (clean && clean.replace(/\.0+$/, '')) || version;
 }
 
 ;// CONCATENATED MODULE: ./src/dists/gyan.js
@@ -58437,7 +58441,7 @@ class JohnVanSickleInstaller {
    * @returns {Promise<import('./installer').ReleaseInfo?>}
    */
   async getRelease() {
-    const version = node_modules_semver.clean(this.version) || this.version;
+    const version = cleanVersion(this.version);
     /** @type {import('undici').RequestInit} */
     const init = {
       method: 'HEAD',
@@ -58612,7 +58616,7 @@ class EvermeetCxInstaller {
   async getAvailableReleases() {
     const releases = [await this.getLatestRelease()];
     if (this.version.toLowerCase() !== 'git' && this.version.toLowerCase() !== 'release') {
-      const release = await this.getRelease(node_modules_semver.clean(this.version) || this.version, false);
+      const release = await this.getRelease(cleanVersion(this.version), false);
       if (release && releases[0].version !== release.version) releases.push(release);
     }
     return releases;
@@ -58703,7 +58707,7 @@ async function install(options) {
     return await installer.downloadTool(release);
   }
   const releases = await installer.getAvailableReleases();
-  const installVer = node_modules_semver.maxSatisfying(
+  const installVer = semver.maxSatisfying(
     releases.map(({version}) => version),
     options.version,
   );
@@ -58714,6 +58718,11 @@ async function install(options) {
 }
 
 ;// CONCATENATED MODULE: ./src/action.js
+
+
+
+
+
 
 
 
@@ -58738,6 +58747,21 @@ async function run() {
       arch: external_os_.arch(),
       toolCacheDir: 'ffmpeg',
     });
+
+    const binaryExt = external_os_.platform() === 'win32' ? '.exe' : '';
+    const ffmpegPath = external_path_.join(installed.toolInstallDir, 'ffmpeg' + binaryExt);
+    const ffprobePath = external_path_.join(installed.toolInstallDir, 'ffprobe' + binaryExt);
+
+    await (0,promises_namespaceObject.chmod)(ffmpegPath, '755');
+    await (0,promises_namespaceObject.chmod)(ffprobePath, '755');
+
+    external_assert_.strictEqual(await exec.exec(ffmpegPath, ['-version']), 0);
+    external_assert_.strictEqual(await exec.exec(ffprobePath, ['-version']), 0);
+
+    core.addPath(installed.toolInstallDir);
+    core.setOutput('path', installed.toolInstallDir);
+    core.setOutput('ffmpeg-path', ffmpegPath);
+    core.setOutput('ffprobe-path', ffprobePath);
   } catch (error) {
     core.setFailed(error);
   }
