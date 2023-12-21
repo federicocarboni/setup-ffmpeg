@@ -1,14 +1,22 @@
-name: Setup ffmpeg
-description: Setup ffmpeg in GitHub Actions
-
+name: Setup FFmpeg
+description: 'Download, cache and add to PATH ffmpeg and ffprobe binaries.'
+author: Federico Carboni
 inputs:
   ffmpeg-version:
-    required: false
+    description: 'Version of ffmpeg to use. Version Spec is only fully supported on Windows.'
     default: release
+  architecture:
+    description: 'Target architecture for FFmpeg, on Windows and MacOS only x64 is supported; on Linux arm64 may also be used. Defaults to the system architecture.'
   github-token:
-    required: false
-    default: ${{ github.token }}
-
+    description: 'Used to pull Windows builds from GyanD/codexffmpeg. Since there's a default, this is typically not supplied by the user unless running GHES.'
+    default: ${{ github.server_url == 'https://github.com' && github.token || '' }}
+outputs:
+  ffmpeg-version:
+    description: The installed ffmpeg version
+  ffmpeg-path:
+    description: Path to the ffmpeg binaries
+  cache-hit:
+    description: A boolean value to indicate whether the tool cache was hit
 runs:
   using: node20
   main: dist/index.js
