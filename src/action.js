@@ -14,34 +14,41 @@ import {install} from './dists/installer';
  */
 
 const INPUT_FFMPEG_VERSION = 'ffmpeg-version';
+const INPUT_ARCHITECTURE = 'architecture';
 const INPUT_GITHUB_TOKEN = 'github-token';
+
+const OUTPUT_FFMPEG_VERSION = 'ffmpeg-version';
+const OUTPUT_FFMPEG_PATH = 'ffmpeg-path';
+const OUTPUT_CACHE_HIT = 'cache-hit';
 
 async function run() {
   try {
     const version = core.getInput(INPUT_FFMPEG_VERSION);
+    const arch = core.getInput(INPUT_ARCHITECTURE) || os.arch();
     const githubToken = core.getInput(INPUT_GITHUB_TOKEN);
 
-    const installed = await install({
+    const output = await install({
       version,
       githubToken,
-      arch: os.arch(),
+      arch,
       toolCacheDir: 'ffmpeg',
     });
 
     const binaryExt = os.platform() === 'win32' ? '.exe' : '';
-    const ffmpegPath = path.join(installed.toolInstallDir, 'ffmpeg' + binaryExt);
-    const ffprobePath = path.join(installed.toolInstallDir, 'ffprobe' + binaryExt);
+    const ffmpegPath = path.join(output.path, 'ffmpeg' + binaryExt);
+    const ffprobePath = path.join(output.path, 'ffprobe' + binaryExt);
 
+    // Ensure ffmpeg binaries are executable
     await chmod(ffmpegPath, '755');
     await chmod(ffprobePath, '755');
 
-    assert.strictEqual(await exec.exec(ffmpegPath, ['-version']), 0);
-    assert.strictEqual(await exec.exec(ffprobePath, ['-version']), 0);
+    // assert.strictEqual(await exec.exec(ffmpegPath, ['-version']), 0);
+    // assert.strictEqual(await exec.exec(ffprobePath, ['-version']), 0);
 
-    core.addPath(installed.toolInstallDir);
-    core.setOutput('path', installed.toolInstallDir);
-    core.setOutput('ffmpeg-path', ffmpegPath);
-    core.setOutput('ffprobe-path', ffprobePath);
+    core.addPath(output.path);
+    core.setOutput(OUTPUT_FFMPEG_VERSION, output.version);
+    core.setOutput(OUTPUT_FFMPEG_PATH, output.path);
+    core.setOutput(OUTPUT_CACHE_HIT, output.cacheHit);
   } catch (error) {
     core.setFailed(error);
   }

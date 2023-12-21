@@ -17,14 +17,14 @@ export function getTempDir() {
  * not contain all of these parts) to a valid semver version.
  *
  * @param version {string}
- * @param isGitBuild {boolean}
+ * @param isGitRelease {boolean}
  * @returns {string | null}
  */
-export function normalizeVersion(version, isGitBuild) {
+export function normalizeVersion(version, isGitRelease) {
   // Git builds have no version because they are not the same branch as releases
   // they mostly use git commits, build dates or numbers instead of a semver
-  // version
-  if (isGitBuild) return semver.valid('0.0.0-' + version);
+  // version.
+  if (isGitRelease) return semver.valid('0.0.0-' + version);
   const valid = semver.valid(version);
   if (valid) return valid;
   // Fix versions like x.y which are not valid with semver.

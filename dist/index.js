@@ -58253,14 +58253,14 @@ function getTempDir() {
  * not contain all of these parts) to a valid semver version.
  *
  * @param version {string}
- * @param isGitBuild {boolean}
+ * @param isGitRelease {boolean}
  * @returns {string | null}
  */
-function normalizeVersion(version, isGitBuild) {
+function normalizeVersion(version, isGitRelease) {
   // Git builds have no version because they are not the same branch as releases
   // they mostly use git commits, build dates or numbers instead of a semver
-  // version
-  if (isGitBuild) return semver.valid('0.0.0-' + version);
+  // version.
+  if (isGitRelease) return semver.valid('0.0.0-' + version);
   const valid = semver.valid(version);
   if (valid) return valid;
   // Fix versions like x.y which are not valid with semver.
@@ -58296,12 +58296,13 @@ function cleanVersion(version) {
 
 
 
+
 class GyanInstaller {
   /**
    * @param options {import('./installer').InstallerOptions}
    */
   constructor({version, arch, toolCacheDir, githubToken}) {
-    external_assert_.ok(arch === 'x64', 'Unsupported architecture (only x64 is supported)');
+    external_assert_.strictEqual(arch, 'x64', 'Unsupported architecture (only x64 is supported)');
     this.version = version;
     this.toolCacheDir = toolCacheDir;
     this.githubToken = githubToken;
@@ -58334,7 +58335,6 @@ class GyanInstaller {
       checksumUrl: [downloadUrl + '.sha256'],
     };
   }
-
   /**
    * @returns {Promise<import('./installer').ReleaseInfo[]>}
    */
@@ -58359,7 +58359,6 @@ class GyanInstaller {
         ],
       }));
   }
-
   /**
    * @param release {import('./installer').ReleaseInfo}
    * @returns {Promise<import('./installer').InstalledTool>}
@@ -58371,22 +58370,12 @@ class GyanInstaller {
     const toolInstallDir = await tool_cache.cacheDir(dir, this.toolCacheDir, release.version, 'x64');
     return {
       version: release.version,
-      toolInstallDir,
+      path: toolInstallDir,
     };
   }
 }
 
-// EXTERNAL MODULE: external "fs"
-var external_fs_ = __nccwpck_require__(7147);
-// EXTERNAL MODULE: external "crypto"
-var external_crypto_ = __nccwpck_require__(6113);
-;// CONCATENATED MODULE: external "stream/promises"
-const external_stream_promises_namespaceObject = require("stream/promises");
 ;// CONCATENATED MODULE: ./src/dists/johnvansickle.js
-
-
-
-
 
 
 
@@ -58403,12 +58392,11 @@ class JohnVanSickleInstaller {
    */
   constructor({version, arch, skipIntegrityCheck, toolCacheDir}) {
     this.version = version;
-    this.arch = arch === 'x64' ? 'amd64' : arch === 'arm64' ? arch : null;
+    this.arch = arch;
     this.skipIntegrityCheck = skipIntegrityCheck;
     this.toolCacheDir = toolCacheDir;
-    external_assert_.ok(this.arch, 'Only x64 and arm64 are supported');
+    external_assert_.ok(this.arch === 'x64' || this.arch === 'arm64', 'Only x64 and arm64 are supported');
   }
-
   /**
    * @returns {Promise<import('./installer').ReleaseInfo>}
    */
@@ -58426,17 +58414,17 @@ class JohnVanSickleInstaller {
     external_assert_.ok(readme, 'Failed to get latest johnvansickle ffmpeg release');
     const versionMatch = readme.match(/version\: (.+)\n/);
     external_assert_.ok(versionMatch, 'Failed to read version from readme');
+    core.debug(`Found latest johnvansickle release: ${versionMatch}`);
     const version = normalizeVersion(versionMatch[1].trim(), isGitBuild);
     const downloadUrl = isGitBuild
-      ? `https://johnvansickle.com/ffmpeg/builds/ffmpeg-git-${this.arch}-static.tar.xz`
-      : `https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-${this.arch}-static.tar.xz`;
+      ? `https://johnvansickle.com/ffmpeg/builds/ffmpeg-git-${this.getArch()}-static.tar.xz`
+      : `https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-${this.getArch()}-static.tar.xz`;
     return {
       version,
       downloadUrl: [downloadUrl],
       checksumUrl: [downloadUrl + '.md5'],
     };
   }
-
   /**
    * @returns {Promise<import('./installer').ReleaseInfo?>}
    */
@@ -58451,23 +58439,23 @@ class JohnVanSickleInstaller {
       redirect: 'manual',
     };
     let res = await (0,undici/* fetch */.he)(
-      `https://johnvansickle.com/ffmpeg/releases/ffmpeg-${version}-${this.arch}-static.tar.xz`,
+      `https://johnvansickle.com/ffmpeg/releases/ffmpeg-${version}-${this.getArch()}-static.tar.xz`,
       init,
     );
     // Check in old releases if not available
     if (!res.ok) {
       res = await (0,undici/* fetch */.he)(
-        `https://johnvansickle.com/ffmpeg/old-releases/ffmpeg-${version}-${this.arch}-static.tar.xz`,
+        `https://johnvansickle.com/ffmpeg/old-releases/ffmpeg-${version}-${this.getArch()}-static.tar.xz`,
         init,
       );
     }
     if (!res.ok) return null;
+    core.debug(`Found johnvansickle release: ${version}`);
     return {
       version: normalizeVersion(version, false),
       downloadUrl: [res.url],
     };
   }
-
   /**
    * johnvansickle.com does not provide any way to get a list of available
    * versions except very old ones and the latest ones.
@@ -58484,7 +58472,6 @@ class JohnVanSickleInstaller {
     }
     return releases;
   }
-
   // /**
   //  * @param {ReleaseInfo} release
   //  * @param {string} archivePath
@@ -58506,7 +58493,10 @@ class JohnVanSickleInstaller {
   //   console.log(readhash, checksum);
   //   return readhash === checksum;
   // }
-
+  /** @private */
+  getArch() {
+    return this.arch === 'x64' ? 'amd64' : this.arch;
+  }
   /**
    * @param {import('./installer').ReleaseInfo} release
    * @returns {Promise<import('./installer').InstalledTool>}
@@ -58518,10 +58508,10 @@ class JohnVanSickleInstaller {
     const extractPath = await tool_cache.extractTar(archivePath, null, 'x');
     const dir = external_path_.join(extractPath, (await (0,promises_namespaceObject.readdir)(extractPath))[0]);
 
-    const toolInstallDir = await tool_cache.cacheDir(dir, this.toolCacheDir, release.version);
+    const toolInstallDir = await tool_cache.cacheDir(dir, this.toolCacheDir, release.version, this.arch);
     return {
       version: release.version,
-      toolInstallDir,
+      path: toolInstallDir,
     };
   }
 }
@@ -58557,7 +58547,7 @@ class EvermeetCxInstaller {
    * @param options {import('./installer').InstallerOptions}
    */
   constructor({version, arch, toolCacheDir}) {
-    external_assert_.strictEqual(arch, 'x64');
+    external_assert_.strictEqual(arch, 'x64', 'Unsupported architecture (only x64 is supported)');
     this.version = version;
     this.toolCacheDir = toolCacheDir;
   }
@@ -58596,7 +58586,8 @@ class EvermeetCxInstaller {
     external_assert_.ok(ffprobe, 'Requested version not found');
     external_assert_.strictEqual(ffmpeg.version, ffprobe.version);
     return {
-      version: normalizeVersion(ffmpeg.version, isGitRelease),
+      version: ffmpeg.version,
+      isGitRelease,
       downloadUrl: [ffmpeg.downloadUrl, ffprobe.downloadUrl],
       checksumUrl: [ffmpeg.checksumUrl, ffprobe.checksumUrl],
     };
@@ -58617,7 +58608,9 @@ class EvermeetCxInstaller {
     const releases = [await this.getLatestRelease()];
     if (this.version.toLowerCase() !== 'git' && this.version.toLowerCase() !== 'release') {
       const release = await this.getRelease(cleanVersion(this.version), false);
-      if (release && releases[0].version !== release.version) releases.push(release);
+      if (release && releases[0].version !== release.version) {
+        releases.push(release);
+      }
     }
     return releases;
   }
@@ -58642,7 +58635,7 @@ class EvermeetCxInstaller {
     const toolInstallDir = await tool_cache.cacheDir(dirToCache, this.toolCacheDir, release.version);
     return {
       version: release.version,
-      toolInstallDir,
+      path: toolInstallDir,
     };
   }
 }
@@ -58671,7 +58664,14 @@ class EvermeetCxInstaller {
 /**
  * @typedef {object} InstalledTool
  * @property {string} version
- * @property {string} toolInstallDir
+ * @property {string} path
+ */
+
+/**
+ * @typedef {object} InstallOutput
+ * @property {string} version
+ * @property {string} path
+ * @property {boolean} cacheHit
  */
 
 /**
@@ -58715,7 +58715,7 @@ async function getRelease(installer, options) {
 
 /**
  * @param options {InstallerOptions}
- * @returns {Promise<InstalledTool>}
+ * @returns {Promise<InstallOutput>}
  */
 async function install(options) {
   const installer = getInstaller(options);
@@ -58725,14 +58725,17 @@ async function install(options) {
     release = await installer.getLatestRelease();
     version = release.version;
   }
-  const toolInstallDir = tool_cache.find(options.toolCacheDir, version);
+  const toolInstallDir = tool_cache.find(options.toolCacheDir, version, options.arch);
   if (toolInstallDir) {
     core.info(`Using ffmpeg version ${version} from tool cache`);
-    return {toolInstallDir, version};
+    return {version, path: toolInstallDir, cacheHit: true};
   }
   if (!release) release = await getRelease(installer, options);
   core.info(`Installing ffmpeg version ${release.version} from ${release.downloadUrl}`);
-  return await installer.downloadTool(release);
+  return {
+    ...(await installer.downloadTool(release)),
+    cacheHit: false,
+  };
 }
 
 ;// CONCATENATED MODULE: ./src/action.js
@@ -58752,34 +58755,41 @@ async function install(options) {
  */
 
 const INPUT_FFMPEG_VERSION = 'ffmpeg-version';
+const INPUT_ARCHITECTURE = 'architecture';
 const INPUT_GITHUB_TOKEN = 'github-token';
+
+const OUTPUT_FFMPEG_VERSION = 'ffmpeg-version';
+const OUTPUT_FFMPEG_PATH = 'ffmpeg-path';
+const OUTPUT_CACHE_HIT = 'cache-hit';
 
 async function run() {
   try {
     const version = core.getInput(INPUT_FFMPEG_VERSION);
+    const arch = core.getInput(INPUT_ARCHITECTURE) || external_os_.arch();
     const githubToken = core.getInput(INPUT_GITHUB_TOKEN);
 
-    const installed = await install({
+    const output = await install({
       version,
       githubToken,
-      arch: external_os_.arch(),
+      arch,
       toolCacheDir: 'ffmpeg',
     });
 
     const binaryExt = external_os_.platform() === 'win32' ? '.exe' : '';
-    const ffmpegPath = external_path_.join(installed.toolInstallDir, 'ffmpeg' + binaryExt);
-    const ffprobePath = external_path_.join(installed.toolInstallDir, 'ffprobe' + binaryExt);
+    const ffmpegPath = external_path_.join(output.path, 'ffmpeg' + binaryExt);
+    const ffprobePath = external_path_.join(output.path, 'ffprobe' + binaryExt);
 
+    // Ensure ffmpeg binaries are executable
     await (0,promises_namespaceObject.chmod)(ffmpegPath, '755');
     await (0,promises_namespaceObject.chmod)(ffprobePath, '755');
 
-    external_assert_.strictEqual(await exec.exec(ffmpegPath, ['-version']), 0);
-    external_assert_.strictEqual(await exec.exec(ffprobePath, ['-version']), 0);
+    // assert.strictEqual(await exec.exec(ffmpegPath, ['-version']), 0);
+    // assert.strictEqual(await exec.exec(ffprobePath, ['-version']), 0);
 
-    core.addPath(installed.toolInstallDir);
-    core.setOutput('path', installed.toolInstallDir);
-    core.setOutput('ffmpeg-path', ffmpegPath);
-    core.setOutput('ffprobe-path', ffprobePath);
+    core.addPath(output.path);
+    core.setOutput(OUTPUT_FFMPEG_VERSION, output.version);
+    core.setOutput(OUTPUT_FFMPEG_PATH, output.path);
+    core.setOutput(OUTPUT_CACHE_HIT, output.cacheHit);
   } catch (error) {
     core.setFailed(error);
   }

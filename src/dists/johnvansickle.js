@@ -2,13 +2,9 @@ import * as assert from 'assert';
 
 import * as tc from '@actions/tool-cache';
 import * as core from '@actions/core';
-import * as semver from 'semver';
 import {fetch} from 'undici';
 
 import {USER_AGENT, cleanVersion, normalizeVersion} from '../util';
-import {createReadStream} from 'fs';
-import {createHash} from 'crypto';
-import {pipeline} from 'stream/promises';
 import {readdir} from 'fs/promises';
 import * as path from 'path';
 
@@ -18,12 +14,11 @@ export class JohnVanSickleInstaller {
    */
   constructor({version, arch, skipIntegrityCheck, toolCacheDir}) {
     this.version = version;
-    this.arch = arch === 'x64' ? 'amd64' : arch === 'arm64' ? arch : null;
+    this.arch = arch;
     this.skipIntegrityCheck = skipIntegrityCheck;
     this.toolCacheDir = toolCacheDir;
-    assert.ok(this.arch, 'Only x64 and arm64 are supported');
+    assert.ok(this.arch === 'x64' || this.arch === 'arm64', 'Only x64 and arm64 are supported');
   }
-
   /**
    * @returns {Promise<import('./installer').ReleaseInfo>}
    */
@@ -41,17 +36,17 @@ export class JohnVanSickleInstaller {
     assert.ok(readme, 'Failed to get latest johnvansickle ffmpeg release');
     const versionMatch = readme.match(/version\: (.+)\n/);
     assert.ok(versionMatch, 'Failed to read version from readme');
+    core.debug(`Found latest johnvansickle release: ${versionMatch}`);
     const version = normalizeVersion(versionMatch[1].trim(), isGitBuild);
     const downloadUrl = isGitBuild
-      ? `https://johnvansickle.com/ffmpeg/builds/ffmpeg-git-${this.arch}-static.tar.xz`
-      : `https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-${this.arch}-static.tar.xz`;
+      ? `https://johnvansickle.com/ffmpeg/builds/ffmpeg-git-${this.getArch()}-static.tar.xz`
+      : `https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-${this.getArch()}-static.tar.xz`;
     return {
       version,
       downloadUrl: [downloadUrl],
       checksumUrl: [downloadUrl + '.md5'],
     };
   }
-
   /**
    * @returns {Promise<import('./installer').ReleaseInfo?>}
    */
@@ -66,23 +61,23 @@ export class JohnVanSickleInstaller {
       redirect: 'manual',
     };
     let res = await fetch(
-      `https://johnvansickle.com/ffmpeg/releases/ffmpeg-${version}-${this.arch}-static.tar.xz`,
+      `https://johnvansickle.com/ffmpeg/releases/ffmpeg-${version}-${this.getArch()}-static.tar.xz`,
       init,
     );
     // Check in old releases if not available
     if (!res.ok) {
       res = await fetch(
-        `https://johnvansickle.com/ffmpeg/old-releases/ffmpeg-${version}-${this.arch}-static.tar.xz`,
+        `https://johnvansickle.com/ffmpeg/old-releases/ffmpeg-${version}-${this.getArch()}-static.tar.xz`,
         init,
       );
     }
     if (!res.ok) return null;
+    core.debug(`Found johnvansickle release: ${version}`);
     return {
       version: normalizeVersion(version, false),
       downloadUrl: [res.url],
     };
   }
-
   /**
    * johnvansickle.com does not provide any way to get a list of available
    * versions except very old ones and the latest ones.
@@ -99,7 +94,6 @@ export class JohnVanSickleInstaller {
     }
     return releases;
   }
-
   // /**
   //  * @param {ReleaseInfo} release
   //  * @param {string} archivePath
@@ -121,7 +115,10 @@ export class JohnVanSickleInstaller {
   //   console.log(readhash, checksum);
   //   return readhash === checksum;
   // }
-
+  /** @private */
+  getArch() {
+    return this.arch === 'x64' ? 'amd64' : this.arch;
+  }
   /**
    * @param {import('./installer').ReleaseInfo} release
    * @returns {Promise<import('./installer').InstalledTool>}
@@ -133,10 +130,10 @@ export class JohnVanSickleInstaller {
     const extractPath = await tc.extractTar(archivePath, null, 'x');
     const dir = path.join(extractPath, (await readdir(extractPath))[0]);
 
-    const toolInstallDir = await tc.cacheDir(dir, this.toolCacheDir, release.version);
+    const toolInstallDir = await tc.cacheDir(dir, this.toolCacheDir, release.version, this.arch);
     return {
       version: release.version,
-      toolInstallDir,
+      path: toolInstallDir,
     };
   }
 }

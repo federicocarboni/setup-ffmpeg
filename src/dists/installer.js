@@ -21,7 +21,14 @@ import {EvermeetCxInstaller} from './evermeet.cx';
 /**
  * @typedef {object} InstalledTool
  * @property {string} version
- * @property {string} toolInstallDir
+ * @property {string} path
+ */
+
+/**
+ * @typedef {object} InstallOutput
+ * @property {string} version
+ * @property {string} path
+ * @property {boolean} cacheHit
  */
 
 /**
@@ -65,7 +72,7 @@ async function getRelease(installer, options) {
 
 /**
  * @param options {InstallerOptions}
- * @returns {Promise<InstalledTool>}
+ * @returns {Promise<InstallOutput>}
  */
 export async function install(options) {
   const installer = getInstaller(options);
@@ -75,12 +82,15 @@ export async function install(options) {
     release = await installer.getLatestRelease();
     version = release.version;
   }
-  const toolInstallDir = tc.find(options.toolCacheDir, version);
+  const toolInstallDir = tc.find(options.toolCacheDir, version, options.arch);
   if (toolInstallDir) {
     core.info(`Using ffmpeg version ${version} from tool cache`);
-    return {toolInstallDir, version};
+    return {version, path: toolInstallDir, cacheHit: true};
   }
   if (!release) release = await getRelease(installer, options);
   core.info(`Installing ffmpeg version ${release.version} from ${release.downloadUrl}`);
-  return await installer.downloadTool(release);
+  return {
+    ...(await installer.downloadTool(release)),
+    cacheHit: false,
+  };
 }

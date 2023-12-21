@@ -14,7 +14,7 @@ export class EvermeetCxInstaller {
    * @param options {import('./installer').InstallerOptions}
    */
   constructor({version, arch, toolCacheDir}) {
-    assert.strictEqual(arch, 'x64');
+    assert.strictEqual(arch, 'x64', 'Unsupported architecture (only x64 is supported)');
     this.version = version;
     this.toolCacheDir = toolCacheDir;
   }
@@ -53,7 +53,8 @@ export class EvermeetCxInstaller {
     assert.ok(ffprobe, 'Requested version not found');
     assert.strictEqual(ffmpeg.version, ffprobe.version);
     return {
-      version: normalizeVersion(ffmpeg.version, isGitRelease),
+      version: ffmpeg.version,
+      isGitRelease,
       downloadUrl: [ffmpeg.downloadUrl, ffprobe.downloadUrl],
       checksumUrl: [ffmpeg.checksumUrl, ffprobe.checksumUrl],
     };
@@ -74,7 +75,9 @@ export class EvermeetCxInstaller {
     const releases = [await this.getLatestRelease()];
     if (this.version.toLowerCase() !== 'git' && this.version.toLowerCase() !== 'release') {
       const release = await this.getRelease(cleanVersion(this.version), false);
-      if (release && releases[0].version !== release.version) releases.push(release);
+      if (release && releases[0].version !== release.version) {
+        releases.push(release);
+      }
     }
     return releases;
   }
@@ -99,7 +102,7 @@ export class EvermeetCxInstaller {
     const toolInstallDir = await tc.cacheDir(dirToCache, this.toolCacheDir, release.version);
     return {
       version: release.version,
-      toolInstallDir,
+      path: toolInstallDir,
     };
   }
 }

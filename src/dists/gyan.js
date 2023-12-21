@@ -2,6 +2,7 @@ import * as assert from 'assert';
 import * as path from 'path';
 import {readdir} from 'fs/promises';
 
+import * as core from '@actions/core';
 import * as tc from '@actions/tool-cache';
 import {Octokit} from '@octokit/core';
 import {fetch} from 'undici';
@@ -13,7 +14,7 @@ export class GyanInstaller {
    * @param options {import('./installer').InstallerOptions}
    */
   constructor({version, arch, toolCacheDir, githubToken}) {
-    assert.ok(arch === 'x64', 'Unsupported architecture (only x64 is supported)');
+    assert.strictEqual(arch, 'x64', 'Unsupported architecture (only x64 is supported)');
     this.version = version;
     this.toolCacheDir = toolCacheDir;
     this.githubToken = githubToken;
@@ -46,7 +47,6 @@ export class GyanInstaller {
       checksumUrl: [downloadUrl + '.sha256'],
     };
   }
-
   /**
    * @returns {Promise<import('./installer').ReleaseInfo[]>}
    */
@@ -71,7 +71,6 @@ export class GyanInstaller {
         ],
       }));
   }
-
   /**
    * @param release {import('./installer').ReleaseInfo}
    * @returns {Promise<import('./installer').InstalledTool>}
@@ -83,7 +82,7 @@ export class GyanInstaller {
     const toolInstallDir = await tc.cacheDir(dir, this.toolCacheDir, release.version, 'x64');
     return {
       version: release.version,
-      toolInstallDir,
+      path: toolInstallDir,
     };
   }
 }
