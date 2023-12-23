@@ -9,7 +9,7 @@ Builds are provided by the following sources:
 - <https://www.gyan.dev/ffmpeg/builds/> Windows builds
 - <https://evermeet.cx/ffmpeg/> MacOS builds
 
-## v3 vs v1
+## v3 vs v2
 
 Version 3 of this action downloads binaries directly from the sources listed above
 instead of periodically updating GitHub releases. In turn this means it receives
@@ -47,5 +47,5 @@ steps:
 
 - `ffmpeg-version`: Installed version of FFmpeg.
 - `ffmpeg-path`: Path to the install directory containing `ffmpeg` and `ffprobe`
-commands.
+binaries.
 - `cache-hit`: A boolean value indicating whether the tool cache was hit.
