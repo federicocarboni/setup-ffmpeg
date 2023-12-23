@@ -1,10 +1,8 @@
-import * as assert from 'assert';
 import * as path from 'path';
 import * as os from 'os';
 import {chmod} from 'fs/promises';
 
 import * as core from '@actions/core';
-import * as exec from '@actions/exec';
 
 import {install} from './dists/installer';
 

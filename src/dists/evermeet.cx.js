@@ -1,13 +1,12 @@
 import * as assert from 'assert';
 import * as path from 'path';
-import {mkdir, readdir, rename} from 'fs/promises';
+import {mkdir, rename} from 'fs/promises';
 
 import * as tc from '@actions/tool-cache';
-import * as semver from 'semver';
 import {fetch} from 'undici';
 import {v4 as uuidV4} from 'uuid';
 
-import {USER_AGENT, cleanVersion, getTempDir, normalizeVersion} from '../util';
+import {USER_AGENT, cleanVersion, getTempDir} from '../util';
 
 export class EvermeetCxInstaller {
   /**

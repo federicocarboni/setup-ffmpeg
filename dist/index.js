@@ -58211,8 +58211,6 @@ var __webpack_exports__ = {};
 // ESM COMPAT FLAG
 __nccwpck_require__.r(__webpack_exports__);
 
-// EXTERNAL MODULE: external "assert"
-var external_assert_ = __nccwpck_require__(9491);
 // EXTERNAL MODULE: external "path"
 var external_path_ = __nccwpck_require__(1017);
 // EXTERNAL MODULE: external "os"
@@ -58221,8 +58219,8 @@ var external_os_ = __nccwpck_require__(2037);
 const promises_namespaceObject = require("fs/promises");
 // EXTERNAL MODULE: ./node_modules/.pnpm/@actions+core@1.10.1/node_modules/@actions/core/lib/core.js
 var core = __nccwpck_require__(9093);
-// EXTERNAL MODULE: ./node_modules/.pnpm/@actions+exec@1.1.1/node_modules/@actions/exec/lib/exec.js
-var exec = __nccwpck_require__(7775);
+// EXTERNAL MODULE: external "assert"
+var external_assert_ = __nccwpck_require__(9491);
 // EXTERNAL MODULE: ./node_modules/.pnpm/@actions+tool-cache@2.0.1/node_modules/@actions/tool-cache/lib/tool-cache.js
 var tool_cache = __nccwpck_require__(5561);
 // EXTERNAL MODULE: ./node_modules/.pnpm/semver@7.5.4/node_modules/semver/index.js
@@ -58286,7 +58284,6 @@ function cleanVersion(version) {
 }
 
 ;// CONCATENATED MODULE: ./src/dists/gyan.js
-
 
 
 
@@ -58412,7 +58409,7 @@ class JohnVanSickleInstaller {
     });
     const readme = res.ok && (await res.text());
     external_assert_.ok(readme, 'Failed to get latest johnvansickle ffmpeg release');
-    const versionMatch = readme.match(/version\: (.+)\n/);
+    const versionMatch = readme.match(/version: (.+)\n/);
     external_assert_.ok(versionMatch, 'Failed to read version from readme');
     core.debug(`Found latest johnvansickle release: ${versionMatch}`);
     const version = normalizeVersion(versionMatch[1].trim(), isGitBuild);
@@ -58531,7 +58528,6 @@ const stringify = dist/* stringify */.Pz;
 const parse = dist/* parse */.Qc;
 
 ;// CONCATENATED MODULE: ./src/dists/evermeet.cx.js
-
 
 
 
@@ -58739,8 +58735,6 @@ async function install(options) {
 }
 
 ;// CONCATENATED MODULE: ./src/action.js
-
-
 
 
 

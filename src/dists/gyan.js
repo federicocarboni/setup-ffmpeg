@@ -2,7 +2,6 @@ import * as assert from 'assert';
 import * as path from 'path';
 import {readdir} from 'fs/promises';
 
-import * as core from '@actions/core';
 import * as tc from '@actions/tool-cache';
 import {Octokit} from '@octokit/core';
 import {fetch} from 'undici';

@@ -34,7 +34,7 @@ export class JohnVanSickleInstaller {
     });
     const readme = res.ok && (await res.text());
     assert.ok(readme, 'Failed to get latest johnvansickle ffmpeg release');
-    const versionMatch = readme.match(/version\: (.+)\n/);
+    const versionMatch = readme.match(/version: (.+)\n/);
     assert.ok(versionMatch, 'Failed to read version from readme');
     core.debug(`Found latest johnvansickle release: ${versionMatch}`);
     const version = normalizeVersion(versionMatch[1].trim(), isGitBuild);
