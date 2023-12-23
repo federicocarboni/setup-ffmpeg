@@ -3,7 +3,7 @@
 This action sets up and caches a specific FFmpeg version, providing the `ffmpeg`
 and `ffprobe` commands.
 
-Builds are provided by the following sources:
+Builds are downloaded from the following sources:
 
 - <https://johnvansickle.com/ffmpeg/> Linux builds
 - <https://www.gyan.dev/ffmpeg/builds/> Windows builds
@@ -13,7 +13,13 @@ Builds are provided by the following sources:
 
 Version 3 of this action downloads binaries directly from the sources listed above
 instead of periodically updating GitHub releases. In turn this means it receives
-updates more frequently and supports older versions and git releases.
+updates more frequently and supports git master builds and selecting a specific
+version.
+
+By default the latest release version available for the platform is used. As
+upstream sources are not guaranteed to update at the same time, the action may
+at times install different versions of ffmpeg for different operating systems,
+unless a specific version is requested.
 
 ## Usage
 
@@ -26,13 +32,9 @@ steps:
     id: setup-ffmpeg
     with:
       # A specific version to download, may also be "release" or a specific version
-      # like "6.1.0". At the moment semver specifiers (i.e. >=6.1.0)  are supported
+      # like "6.1.0". At the moment semver specifiers (i.e. >=6.1.0) are supported
       # only on Windows, on other platforms they are allowed but version is matched
-      # exactly.
-      # As of version 3, this action -- by default -- uses the latest release version
-      # available for the platform. As upstream sources are not guaranteed to update
-      # at the same time, the action may install different versions of ffmpeg for
-      # different operating systems, unless a specific version is requested.
+      # exactly regardless.
       ffmpeg-version: release
       # Target architecture of the ffmpeg executable to install. Defaults to the
       # system architecture. Only x64 and arm64 are supported (arm64 only on Linux).
