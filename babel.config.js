@@ -1,8 +1,6 @@
-module.exports = (api) => ({
+// For testing with Jest
+module.exports = {
   presets: [['@babel/preset-env', {
-    targets: {
-      node: 'current',
-      esmodules: !api.env('NODE_TEST'),
-    },
+    targets: {node: 'current'},
   }]],
-});
+};
