@@ -6,6 +6,23 @@ on:
       - '**.md'
 
 jobs:
+  test-arch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run FedericoCarboni/setup-ffmpeg
+        uses: ./
+        with:
+          architecture: arm64
+      - name: Run FedericoCarboni/setup-ffmpeg
+        uses: ./
+        with:
+          architecture: arm64
+      - run: ffmpeg -version
+      - run: ffprobe -version
+
   test:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 2
