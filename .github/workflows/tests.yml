@@ -20,8 +20,8 @@ jobs:
         uses: ./
         with:
           architecture: arm64
-      - run: ffmpeg -version
-      - run: ffprobe -version
+      - run: which ffmpeg
+      - run: which ffprobe
 
   test:
     runs-on: ${{ matrix.os }}
