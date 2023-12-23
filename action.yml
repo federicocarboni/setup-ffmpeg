@@ -8,7 +8,7 @@ inputs:
   architecture:
     description: 'Target architecture for FFmpeg, on Windows and MacOS only x64 is supported; on Linux arm64 may also be used. Defaults to the system architecture.'
   github-token:
-    description: 'Used to pull Windows builds from GyanD/codexffmpeg. Since there's a default, this is typically not supplied by the user unless running GHES.'
+    description: "Used to pull Windows builds from GyanD/codexffmpeg. Since there's a default, this is typically not supplied by the user."
     default: ${{ github.server_url == 'https://github.com' && github.token || '' }}
 outputs:
   ffmpeg-version:
