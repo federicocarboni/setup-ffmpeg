@@ -6,6 +6,23 @@ on:
       - '**.md'
 
 jobs:
+  test-arch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run FedericoCarboni/setup-ffmpeg
+        uses: ./
+        with:
+          architecture: arm64
+      - name: Run FedericoCarboni/setup-ffmpeg
+        uses: ./
+        with:
+          architecture: arm64
+      - run: which ffmpeg
+      - run: which ffprobe
+
   test:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 2
@@ -20,7 +37,26 @@ jobs:
       - name: Run FedericoCarboni/setup-ffmpeg
         uses: ./
       - name: Run FedericoCarboni/setup-ffmpeg
-        id: setup-ffmpeg
         uses: ./
+      - run: ffmpeg -version
+      - run: ffprobe -version
+      - name: Run FedericoCarboni/setup-ffmpeg
+        uses: ./
+        with:
+          ffmpeg-version: git
+      - name: Run FedericoCarboni/setup-ffmpeg
+        uses: ./
+        with:
+          ffmpeg-version: git
+      - run: ffmpeg -version
+      - run: ffprobe -version
+      - name: Run FedericoCarboni/setup-ffmpeg
+        uses: ./
+        with:
+          ffmpeg-version: '5.1.1'
+      - name: Run FedericoCarboni/setup-ffmpeg
+        uses: ./
+        with:
+          ffmpeg-version: '5.1.1'
       - run: ffmpeg -version
       - run: ffprobe -version
