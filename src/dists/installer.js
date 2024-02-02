@@ -16,7 +16,7 @@ import {EvermeetCxInstaller} from './evermeet.cx';
  * @property {boolean} [skipIntegrityCheck]
  * @property {string} toolCacheDir
  * @property {string} [githubToken]
- * @property {string} [linkingType]
+ * @property {string} linkingType
  */
 
 /**
@@ -92,7 +92,7 @@ export async function install(options) {
   if (!release) release = await getRelease(installer, options);
   core.info(`Installing ffmpeg version ${release.version} from ${release.downloadUrl}`);
   return {
-    ...(await installer.downloadTool(release)),
+    ...(await installer.downloadTool(release, options.linkingType)),
     cacheHit: false,
   };
 }
