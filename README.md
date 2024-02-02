@@ -34,7 +34,8 @@ steps:
       # A specific version to download, may also be "release" or a specific version
       # like "6.1.0". At the moment semver specifiers (i.e. >=6.1.0) are supported
       # only on Windows, on other platforms they are allowed but version is matched
-      # exactly regardless.
+      # exactly regardless. On windows, you can append -shared to the version to
+      # download shared binaries instead of statically linked ones
       ffmpeg-version: release
       # Target architecture of the ffmpeg executable to install. Defaults to the
       # system architecture. Only x64 and arm64 are supported (arm64 only on Linux).
