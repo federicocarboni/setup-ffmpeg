@@ -12,11 +12,12 @@ export class GyanInstaller {
   /**
    * @param options {import('./installer').InstallerOptions}
    */
-  constructor({version, arch, toolCacheDir, githubToken}) {
+  constructor({version, arch, toolCacheDir, githubToken, linkingType}) {
     assert.strictEqual(arch, 'x64', 'Unsupported architecture (only x64 is supported)');
     this.version = version;
     this.toolCacheDir = toolCacheDir;
     this.githubToken = githubToken;
+    this.linkingType = linkingType;
     this.octokit = new Octokit({
       auth: this.githubToken,
     });
@@ -26,7 +27,7 @@ export class GyanInstaller {
    */
   async getLatestRelease() {
     const isGitBuild = this.version.toLowerCase() === 'git';
-    const isSharedBuild = this.version.toLowerCase() === 'release-shared';
+    const isSharedBuild = this.linkingType === 'shared';
     const url = isGitBuild
       ? 'https://www.gyan.dev/ffmpeg/builds/git-version'
       : 'https://www.gyan.dev/ffmpeg/builds/release-version';
@@ -58,7 +59,7 @@ export class GyanInstaller {
       owner: 'GyanD',
       repo: 'codexffmpeg',
     });
-    const linkingType = this.version.endsWith('-shared') ? '-shared' : '';
+    const linkingType = this.linkingType === 'shared' ? '-shared' : '';
     return data.data
       .filter(
         (release) => release.name.startsWith('ffmpeg') && release.tag_name.match(/^[0-9]+\.[0-9]+/),

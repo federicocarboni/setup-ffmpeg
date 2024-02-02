@@ -34,12 +34,15 @@ steps:
       # A specific version to download, may also be "release" or a specific version
       # like "6.1.0". At the moment semver specifiers (i.e. >=6.1.0) are supported
       # only on Windows, on other platforms they are allowed but version is matched
-      # exactly regardless. On windows, you can append -shared to the version to
-      # download shared binaries instead of statically linked ones
+      # exactly regardless.
       ffmpeg-version: release
       # Target architecture of the ffmpeg executable to install. Defaults to the
       # system architecture. Only x64 and arm64 are supported (arm64 only on Linux).
       architecture: ''
+      # Linking type of the binaries. Use "shared" to download shared binaries and 
+      # "static" for statically linked ones. Shared builds are currently only available
+      # for windows releases. Defaults to "static"
+      linking-type: static
       # As of version 3 of this action, builds are no longer downloaded from GitHub
       # except on Windows: https://github.com/GyanD/codexffmpeg/releases.
       github-token: ${{ github.server_url == 'https://github.com' && github.token || '' }}

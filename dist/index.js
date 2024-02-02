@@ -59965,10 +59965,10 @@ var external_path_ = __nccwpck_require__(1017);
 var external_os_ = __nccwpck_require__(2037);
 ;// CONCATENATED MODULE: external "fs/promises"
 const promises_namespaceObject = require("fs/promises");
-// EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
-var core = __nccwpck_require__(2186);
 // EXTERNAL MODULE: external "assert"
 var external_assert_ = __nccwpck_require__(9491);
+// EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
+var core = __nccwpck_require__(2186);
 // EXTERNAL MODULE: ./node_modules/@actions/tool-cache/lib/tool-cache.js
 var tool_cache = __nccwpck_require__(7784);
 // EXTERNAL MODULE: ./node_modules/semver/index.js
@@ -60046,11 +60046,12 @@ class GyanInstaller {
   /**
    * @param options {import('./installer').InstallerOptions}
    */
-  constructor({version, arch, toolCacheDir, githubToken}) {
+  constructor({version, arch, toolCacheDir, githubToken, linkingType}) {
     external_assert_.strictEqual(arch, 'x64', 'Unsupported architecture (only x64 is supported)');
     this.version = version;
     this.toolCacheDir = toolCacheDir;
     this.githubToken = githubToken;
+    this.linkingType = linkingType;
     this.octokit = new dist_node.Octokit({
       auth: this.githubToken,
     });
@@ -60060,7 +60061,7 @@ class GyanInstaller {
    */
   async getLatestRelease() {
     const isGitBuild = this.version.toLowerCase() === 'git';
-    const isSharedBuild = this.version.toLowerCase() === 'release-shared';
+    const isSharedBuild = this.linkingType === 'shared';
     const url = isGitBuild
       ? 'https://www.gyan.dev/ffmpeg/builds/git-version'
       : 'https://www.gyan.dev/ffmpeg/builds/release-version';
@@ -60092,7 +60093,7 @@ class GyanInstaller {
       owner: 'GyanD',
       repo: 'codexffmpeg',
     });
-    const linkingType = this.version.endsWith('-shared') ? '-shared' : '';
+    const linkingType = this.linkingType === 'shared' ? '-shared' : '';
     return data.data
       .filter(
         (release) => release.name.startsWith('ffmpeg') && release.tag_name.match(/^[0-9]+\.[0-9]+/),
@@ -60407,6 +60408,7 @@ class EvermeetCxInstaller {
  * @property {boolean} [skipIntegrityCheck]
  * @property {string} toolCacheDir
  * @property {string} [githubToken]
+ * @property {string} [linkingType]
  */
 
 /**
@@ -60454,7 +60456,7 @@ async function getRelease(installer, options) {
   const releases = await installer.getAvailableReleases();
   const installVer = semver.maxSatisfying(
     releases.map(({version}) => version),
-    options.version.replace('-shared', ''),
+    options.version,
   );
   const release = releases.find(({version}) => version === installVer);
   external_assert_.ok(release, `Requested version ${installVer} is not available`);
@@ -60469,14 +60471,12 @@ async function install(options) {
   const installer = getInstaller(options);
   let release;
   let version = options.version;
-  const lowercaseVersion = version.toLowerCase();
-  if (lowercaseVersion === 'git' || 
-      lowercaseVersion === 'release' || 
-      lowercaseVersion === 'release-shared') {
+  if (version.toLowerCase() === 'git' || 
+      version.toLowerCase() === 'release') {
     release = await installer.getLatestRelease();
     version = release.version;
   }
-  const toolInstallDir = tool_cache.find(options.toolCacheDir, version, options.arch);
+  const toolInstallDir = tool_cache.find(options.toolCacheDir, version + '-' + options.linkingType, options.arch);
   if (toolInstallDir) {
     core.info(`Using ffmpeg version ${version} from tool cache`);
     return {version, path: toolInstallDir, cacheHit: true};
@@ -60498,6 +60498,7 @@ async function install(options) {
 
 
 
+
 /**
  * @typedef {object} Dist
  * @property {() => Promise<void>} downloadTool
@@ -60506,6 +60507,7 @@ async function install(options) {
 const INPUT_FFMPEG_VERSION = 'ffmpeg-version';
 const INPUT_ARCHITECTURE = 'architecture';
 const INPUT_GITHUB_TOKEN = 'github-token';
+const INPUT_LINKING_TYPE = 'linking-type';
 
 const OUTPUT_FFMPEG_VERSION = 'ffmpeg-version';
 const OUTPUT_FFMPEG_PATH = 'ffmpeg-path';
@@ -60516,12 +60518,16 @@ async function run() {
     const version = core.getInput(INPUT_FFMPEG_VERSION);
     const arch = core.getInput(INPUT_ARCHITECTURE) || external_os_.arch();
     const githubToken = core.getInput(INPUT_GITHUB_TOKEN);
+    const linkingType = core.getInput(INPUT_LINKING_TYPE) || "static";
+
+    external_assert_.ok(["static", "shared"].includes(linkingType), 'Unsupported linking type (use static or shared)');
 
     const output = await install({
       version,
       githubToken,
       arch,
       toolCacheDir: 'ffmpeg',
+      linkingType
     });
 
     const binaryExt = external_os_.platform() === 'win32' ? '.exe' : '';

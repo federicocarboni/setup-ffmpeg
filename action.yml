@@ -7,6 +7,9 @@ inputs:
     default: release
   architecture:
     description: 'Target architecture for FFmpeg, on Windows and MacOS only x64 is supported; on Linux arm64 may also be used. Defaults to the system architecture.'
+  linking-type:
+    description: Linking type of the binaries. Use "shared" to download shared binaries and "static" for statically linked ones. Shared builds are currently only available for windows releases. Defaults to "static"
+    default: static
   github-token:
     description: "Used to pull Windows builds from GyanD/codexffmpeg. Since there's a default, this is typically not supplied by the user."
     default: ${{ github.server_url == 'https://github.com' && github.token || '' }}

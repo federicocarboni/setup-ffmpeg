@@ -16,6 +16,7 @@ import {EvermeetCxInstaller} from './evermeet.cx';
  * @property {boolean} [skipIntegrityCheck]
  * @property {string} toolCacheDir
  * @property {string} [githubToken]
+ * @property {string} [linkingType]
  */
 
 /**
@@ -63,7 +64,7 @@ async function getRelease(installer, options) {
   const releases = await installer.getAvailableReleases();
   const installVer = semver.maxSatisfying(
     releases.map(({version}) => version),
-    options.version.replace('-shared', ''),
+    options.version,
   );
   const release = releases.find(({version}) => version === installVer);
   assert.ok(release, `Requested version ${installVer} is not available`);
@@ -78,14 +79,12 @@ export async function install(options) {
   const installer = getInstaller(options);
   let release;
   let version = options.version;
-  const lowercaseVersion = version.toLowerCase();
-  if (lowercaseVersion === 'git' || 
-      lowercaseVersion === 'release' || 
-      lowercaseVersion === 'release-shared') {
+  if (version.toLowerCase() === 'git' || 
+      version.toLowerCase() === 'release') {
     release = await installer.getLatestRelease();
     version = release.version;
   }
-  const toolInstallDir = tc.find(options.toolCacheDir, version, options.arch);
+  const toolInstallDir = tc.find(options.toolCacheDir, version + '-' + options.linkingType, options.arch);
   if (toolInstallDir) {
     core.info(`Using ffmpeg version ${version} from tool cache`);
     return {version, path: toolInstallDir, cacheHit: true};
