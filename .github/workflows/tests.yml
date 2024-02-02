@@ -78,4 +78,4 @@ jobs:
           ffmpeg-version: 'release-shared'
       - run: ffmpeg -version
       - run: ffprobe -version
-      - run: dir ${{ steps.setup-ffmpeg.outputs.path }}
+      - run: dir ${{ steps.setup-ffmpeg.outputs.ffmpeg-path }}
