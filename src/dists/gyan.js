@@ -79,11 +79,11 @@ export class GyanInstaller {
    * @param release {import('./installer').ReleaseInfo}
    * @returns {Promise<import('./installer').InstalledTool>}
    */
-  async downloadTool(release, linkingType) {
+  async downloadTool(release) {
     const downloadPath = await tc.downloadTool(release.downloadUrl[0]);
     const extractPath = await tc.extract7z(downloadPath, null, _7ZR_PATH);
     const dir = path.join(extractPath, (await readdir(extractPath))[0], 'bin');
-    const toolInstallDir = await tc.cacheDir(dir, this.toolCacheDir, release.version + "-" + linkingType, 'x64');
+    const toolInstallDir = await tc.cacheDir(dir, this.toolCacheDir, release.version, 'x64');
     return {
       version: release.version,
       path: toolInstallDir,

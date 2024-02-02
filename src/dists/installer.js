@@ -84,7 +84,7 @@ export async function install(options) {
     release = await installer.getLatestRelease();
     version = release.version;
   }
-  const toolInstallDir = tc.find(options.toolCacheDir, version + '-' + options.linkingType, options.arch);
+  const toolInstallDir = tc.find(options.toolCacheDir, version, options.arch);
   if (toolInstallDir) {
     core.info(`Using ffmpeg version ${version} from tool cache`);
     return {version, path: toolInstallDir, cacheHit: true};
@@ -92,7 +92,7 @@ export async function install(options) {
   if (!release) release = await getRelease(installer, options);
   core.info(`Installing ffmpeg version ${release.version} from ${release.downloadUrl}`);
   return {
-    ...(await installer.downloadTool(release, options.linkingType)),
+    ...(await installer.downloadTool(release)),
     cacheHit: false,
   };
 }

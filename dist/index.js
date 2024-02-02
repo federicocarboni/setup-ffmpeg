@@ -60113,11 +60113,11 @@ class GyanInstaller {
    * @param release {import('./installer').ReleaseInfo}
    * @returns {Promise<import('./installer').InstalledTool>}
    */
-  async downloadTool(release, linkingType) {
+  async downloadTool(release) {
     const downloadPath = await tool_cache.downloadTool(release.downloadUrl[0]);
     const extractPath = await tool_cache.extract7z(downloadPath, null, _7ZR_PATH);
     const dir = external_path_.join(extractPath, (await (0,promises_namespaceObject.readdir)(extractPath))[0], 'bin');
-    const toolInstallDir = await tool_cache.cacheDir(dir, this.toolCacheDir, release.version + "-" + linkingType, 'x64');
+    const toolInstallDir = await tool_cache.cacheDir(dir, this.toolCacheDir, release.version, 'x64');
     return {
       version: release.version,
       path: toolInstallDir,
@@ -60476,7 +60476,7 @@ async function install(options) {
     release = await installer.getLatestRelease();
     version = release.version;
   }
-  const toolInstallDir = tool_cache.find(options.toolCacheDir, version + '-' + options.linkingType, options.arch);
+  const toolInstallDir = tool_cache.find(options.toolCacheDir, version, options.arch);
   if (toolInstallDir) {
     core.info(`Using ffmpeg version ${version} from tool cache`);
     return {version, path: toolInstallDir, cacheHit: true};
@@ -60484,7 +60484,7 @@ async function install(options) {
   if (!release) release = await getRelease(installer, options);
   core.info(`Installing ffmpeg version ${release.version} from ${release.downloadUrl}`);
   return {
-    ...(await installer.downloadTool(release, options.linkingType)),
+    ...(await installer.downloadTool(release)),
     cacheHit: false,
   };
 }
