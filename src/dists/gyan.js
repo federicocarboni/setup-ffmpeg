@@ -26,6 +26,7 @@ export class GyanInstaller {
    */
   async getLatestRelease() {
     const isGitBuild = this.version.toLowerCase() === 'git';
+    const isSharedBuild = this.version.toLowerCase() === 'release-shared';
     const url = isGitBuild
       ? 'https://www.gyan.dev/ffmpeg/builds/git-version'
       : 'https://www.gyan.dev/ffmpeg/builds/release-version';
@@ -39,7 +40,9 @@ export class GyanInstaller {
     const version = normalizeVersion(versionText.trim(), isGitBuild);
     const downloadUrl = isGitBuild
       ? 'https://www.gyan.dev/ffmpeg/builds/ffmpeg-git-full.7z'
-      : 'https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full.7z';
+      : isSharedBuild
+        ? 'https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full-shared.7z'
+        : 'https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full.7z';
     return {
       version,
       downloadUrl: [downloadUrl],
@@ -55,6 +58,7 @@ export class GyanInstaller {
       owner: 'GyanD',
       repo: 'codexffmpeg',
     });
+    const linkingType = this.version.endsWith('-shared') ? '-shared' : '';
     return data.data
       .filter(
         (release) => release.name.startsWith('ffmpeg') && release.tag_name.match(/^[0-9]+\.[0-9]+/),
@@ -65,7 +69,7 @@ export class GyanInstaller {
         isGitHubRelease: true,
         downloadUrl: [
           release.assets.filter(
-            (asset) => asset.name === `ffmpeg-${release.tag_name}-full_build.7z`,
+            (asset) => asset.name === `ffmpeg-${release.tag_name}-full_build${linkingType}.7z`,
           )[0].browser_download_url,
         ],
       }));

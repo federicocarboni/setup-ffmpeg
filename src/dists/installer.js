@@ -63,7 +63,7 @@ async function getRelease(installer, options) {
   const releases = await installer.getAvailableReleases();
   const installVer = semver.maxSatisfying(
     releases.map(({version}) => version),
-    options.version,
+    options.version.replace('-shared', ''),
   );
   const release = releases.find(({version}) => version === installVer);
   assert.ok(release, 'Requested version is not available');
@@ -78,7 +78,10 @@ export async function install(options) {
   const installer = getInstaller(options);
   let release;
   let version = options.version;
-  if (version.toLowerCase() === 'git' || version.toLowerCase() === 'release') {
+  const lowercaseVersion = version.toLowerCase();
+  if (lowercaseVersion === 'git' || 
+      lowercaseVersion === 'release' || 
+      lowercaseVersion === 'release-shared') {
     release = await installer.getLatestRelease();
     version = release.version;
   }
