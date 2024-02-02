@@ -66,7 +66,7 @@ async function getRelease(installer, options) {
     options.version.replace('-shared', ''),
   );
   const release = releases.find(({version}) => version === installVer);
-  assert.ok(release, 'Requested version is not available');
+  assert.ok(release, `Requested version ${installVer} is not available`);
   return release;
 }
 
