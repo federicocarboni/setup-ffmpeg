@@ -12,8 +12,9 @@ export class EvermeetCxInstaller {
   /**
    * @param options {import('./installer').InstallerOptions}
    */
-  constructor({version, arch, toolCacheDir}) {
+  constructor({version, arch, toolCacheDir, linkingType}) {
     assert.strictEqual(arch, 'x64', 'Unsupported architecture (only x64 is supported)');
+    assert.strictEqual(linkingType, 'static', 'Only static linking is supported');
     this.version = version;
     this.toolCacheDir = toolCacheDir;
   }

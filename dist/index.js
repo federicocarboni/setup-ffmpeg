@@ -60140,12 +60140,13 @@ class JohnVanSickleInstaller {
   /**
    * @param {import('./installer').InstallerOptions} options
    */
-  constructor({version, arch, skipIntegrityCheck, toolCacheDir}) {
+  constructor({version, arch, skipIntegrityCheck, toolCacheDir, linkingType}) {
     this.version = version;
     this.arch = arch;
     this.skipIntegrityCheck = skipIntegrityCheck;
     this.toolCacheDir = toolCacheDir;
     external_assert_.ok(this.arch === 'x64' || this.arch === 'arm64', 'Only x64 and arm64 are supported');
+    external_assert_.strictEqual(linkingType, 'static', 'Only static linking is supported');
   }
   /**
    * @returns {Promise<import('./installer').ReleaseInfo>}
@@ -60295,8 +60296,9 @@ class EvermeetCxInstaller {
   /**
    * @param options {import('./installer').InstallerOptions}
    */
-  constructor({version, arch, toolCacheDir}) {
+  constructor({version, arch, toolCacheDir, linkingType}) {
     external_assert_.strictEqual(arch, 'x64', 'Unsupported architecture (only x64 is supported)');
+    external_assert_.strictEqual(linkingType, 'static', 'Only static linking is supported');
     this.version = version;
     this.toolCacheDir = toolCacheDir;
   }

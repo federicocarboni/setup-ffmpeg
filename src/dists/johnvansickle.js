@@ -12,12 +12,13 @@ export class JohnVanSickleInstaller {
   /**
    * @param {import('./installer').InstallerOptions} options
    */
-  constructor({version, arch, skipIntegrityCheck, toolCacheDir}) {
+  constructor({version, arch, skipIntegrityCheck, toolCacheDir, linkingType}) {
     this.version = version;
     this.arch = arch;
     this.skipIntegrityCheck = skipIntegrityCheck;
     this.toolCacheDir = toolCacheDir;
     assert.ok(this.arch === 'x64' || this.arch === 'arm64', 'Only x64 and arm64 are supported');
+    assert.strictEqual(linkingType, 'static', 'Only static linking is supported');
   }
   /**
    * @returns {Promise<import('./installer').ReleaseInfo>}
