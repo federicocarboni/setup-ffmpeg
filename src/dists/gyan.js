@@ -21,6 +21,7 @@ export class GyanInstaller {
     this.octokit = new Octokit({
       auth: this.githubToken,
     });
+    assert.ok(['static', 'shared'].includes(linkingType), 'Invalid linking type');
   }
   /**
    * @returns {Promise<import('./installer').ReleaseInfo>}
