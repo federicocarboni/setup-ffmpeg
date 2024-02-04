@@ -16,6 +16,7 @@ import {EvermeetCxInstaller} from './evermeet.cx';
  * @property {boolean} [skipIntegrityCheck]
  * @property {string} toolCacheDir
  * @property {string} [githubToken]
+ * @property {string} linkingType
  */
 
 /**
@@ -66,7 +67,7 @@ async function getRelease(installer, options) {
     options.version,
   );
   const release = releases.find(({version}) => version === installVer);
-  assert.ok(release, 'Requested version is not available');
+  assert.ok(release, `Requested version ${installVer} is not available`);
   return release;
 }
 
@@ -78,7 +79,8 @@ export async function install(options) {
   const installer = getInstaller(options);
   let release;
   let version = options.version;
-  if (version.toLowerCase() === 'git' || version.toLowerCase() === 'release') {
+  if (version.toLowerCase() === 'git' || 
+      version.toLowerCase() === 'release') {
     release = await installer.getLatestRelease();
     version = release.version;
   }

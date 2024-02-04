@@ -12,11 +12,12 @@ export class GyanInstaller {
   /**
    * @param options {import('./installer').InstallerOptions}
    */
-  constructor({version, arch, toolCacheDir, githubToken}) {
+  constructor({version, arch, toolCacheDir, githubToken, linkingType}) {
     assert.strictEqual(arch, 'x64', 'Unsupported architecture (only x64 is supported)');
     this.version = version;
     this.toolCacheDir = toolCacheDir;
     this.githubToken = githubToken;
+    this.linkingType = linkingType;
     this.octokit = new Octokit({
       auth: this.githubToken,
     });
@@ -26,6 +27,7 @@ export class GyanInstaller {
    */
   async getLatestRelease() {
     const isGitBuild = this.version.toLowerCase() === 'git';
+    const isSharedBuild = this.linkingType === 'shared';
     const url = isGitBuild
       ? 'https://www.gyan.dev/ffmpeg/builds/git-version'
       : 'https://www.gyan.dev/ffmpeg/builds/release-version';
@@ -39,7 +41,9 @@ export class GyanInstaller {
     const version = normalizeVersion(versionText.trim(), isGitBuild);
     const downloadUrl = isGitBuild
       ? 'https://www.gyan.dev/ffmpeg/builds/ffmpeg-git-full.7z'
-      : 'https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full.7z';
+      : isSharedBuild
+        ? 'https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full-shared.7z'
+        : 'https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full.7z';
     return {
       version,
       downloadUrl: [downloadUrl],
@@ -55,6 +59,7 @@ export class GyanInstaller {
       owner: 'GyanD',
       repo: 'codexffmpeg',
     });
+    const linkingType = this.linkingType === 'shared' ? '-shared' : '';
     return data.data
       .filter(
         (release) => release.name.startsWith('ffmpeg') && release.tag_name.match(/^[0-9]+\.[0-9]+/),
@@ -65,7 +70,7 @@ export class GyanInstaller {
         isGitHubRelease: true,
         downloadUrl: [
           release.assets.filter(
-            (asset) => asset.name === `ffmpeg-${release.tag_name}-full_build.7z`,
+            (asset) => asset.name === `ffmpeg-${release.tag_name}-full_build${linkingType}.7z`,
           )[0].browser_download_url,
         ],
       }));

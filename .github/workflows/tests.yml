@@ -60,3 +60,24 @@ jobs:
           ffmpeg-version: '5.1.1'
       - run: ffmpeg -version
       - run: ffprobe -version
+
+  test-shared:
+    runs-on: windows-latest
+    timeout-minutes: 2
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run FedericoCarboni/setup-ffmpeg
+        uses: ./
+        with:
+          ffmpeg-version: '6.1.1'
+          linking-type: shared
+      - name: Run FedericoCarboni/setup-ffmpeg
+        id: setup-ffmpeg
+        uses: ./
+        with:
+          ffmpeg-version: 'release'
+          linking-type: shared
+      - run: ffmpeg -version
+      - run: ffprobe -version
+      - run: dir ${{ steps.setup-ffmpeg.outputs.ffmpeg-path }}

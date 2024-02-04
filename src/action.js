@@ -1,6 +1,7 @@
 import * as path from 'path';
 import * as os from 'os';
 import {chmod} from 'fs/promises';
+import * as assert from 'assert';
 
 import * as core from '@actions/core';
 
@@ -14,6 +15,7 @@ import {install} from './dists/installer';
 const INPUT_FFMPEG_VERSION = 'ffmpeg-version';
 const INPUT_ARCHITECTURE = 'architecture';
 const INPUT_GITHUB_TOKEN = 'github-token';
+const INPUT_LINKING_TYPE = 'linking-type';
 
 const OUTPUT_FFMPEG_VERSION = 'ffmpeg-version';
 const OUTPUT_FFMPEG_PATH = 'ffmpeg-path';
@@ -24,12 +26,16 @@ async function run() {
     const version = core.getInput(INPUT_FFMPEG_VERSION);
     const arch = core.getInput(INPUT_ARCHITECTURE) || os.arch();
     const githubToken = core.getInput(INPUT_GITHUB_TOKEN);
+    const linkingType = core.getInput(INPUT_LINKING_TYPE) || "static";
+
+    assert.ok(["static", "shared"].includes(linkingType), 'Unsupported linking type (use static or shared)');
 
     const output = await install({
       version,
       githubToken,
       arch,
       toolCacheDir: 'ffmpeg',
+      linkingType
     });
 
     const binaryExt = os.platform() === 'win32' ? '.exe' : '';
