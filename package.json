@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/FedericoCarboni/setup-ffmpeg.git"
+    "url": "git+https://github.com/SplinterStan/setup-ffmpeg.git"
   },
   "keywords": [],
   "author": {
@@ -20,13 +20,13 @@
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/FedericoCarboni/setup-ffmpeg/issues"
+    "url": "https://github.com/SplinterStan/setup-ffmpeg/issues"
   },
-  "homepage": "https://github.com/FedericoCarboni/setup-ffmpeg#readme",
+  "homepage": "https://github.com/SplinterStan/setup-ffmpeg#readme",
   "devDependencies": {
     "@octokit/core": "^5.0.2",
     "@types/jest": "^29.5.11",
-    "@types/node": "^20.10.4",
+    "@types/node": "^24.12.4",
     "@types/semver": "^7.5.6",
     "@types/uuid": "^9.0.7",
     "@vercel/ncc": "^0.38.1",
