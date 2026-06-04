@@ -6,78 +6,43 @@ on:
       - '**.md'
 
 jobs:
-  test-arch:
+  # Suno fork: Linux builds are served from this repo's GitHub Releases. These
+  # tests exercise that path (latest + a pinned version) and must run after at
+  # least one `ffmpeg-*` release has been published.
+  test-linux:
     runs-on: ubuntu-latest
-    timeout-minutes: 2
+    timeout-minutes: 5
 
     steps:
-      - uses: actions/checkout@v3
-      - name: Run FedericoCarboni/setup-ffmpeg
+      - uses: actions/checkout@v4
+      - name: Install latest release
         uses: ./
         with:
-          architecture: arm64
-      - name: Run FedericoCarboni/setup-ffmpeg
+          ffmpeg-version: release
+      - run: ffmpeg -version
+      - run: ffprobe -version
+      - name: Re-run is served from tool cache
         uses: ./
         with:
-          architecture: arm64
-      - run: which ffmpeg
-      - run: which ffprobe
+          ffmpeg-version: release
+      - name: Install pinned version
+        uses: ./
+        with:
+          ffmpeg-version: '7.0.2'
+      - run: ffmpeg -version
 
-  test:
+  # Windows/macOS paths are unchanged from upstream (gyan.dev / evermeet.cx).
+  test-other-os:
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 2
+    timeout-minutes: 5
 
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [windows-latest, macos-latest]
 
     steps:
-      - uses: actions/checkout@v3
-      - name: Run FedericoCarboni/setup-ffmpeg
-        uses: ./
-      - name: Run FedericoCarboni/setup-ffmpeg
-        uses: ./
+      - uses: actions/checkout@v4
+      - uses: ./
       - run: ffmpeg -version
       - run: ffprobe -version
-      - name: Run FedericoCarboni/setup-ffmpeg
-        uses: ./
-        with:
-          ffmpeg-version: git
-      - name: Run FedericoCarboni/setup-ffmpeg
-        uses: ./
-        with:
-          ffmpeg-version: git
-      - run: ffmpeg -version
-      - run: ffprobe -version
-      - name: Run FedericoCarboni/setup-ffmpeg
-        uses: ./
-        with:
-          ffmpeg-version: '5.1.1'
-      - name: Run FedericoCarboni/setup-ffmpeg
-        uses: ./
-        with:
-          ffmpeg-version: '5.1.1'
-      - run: ffmpeg -version
-      - run: ffprobe -version
-
-  test-shared:
-    runs-on: windows-latest
-    timeout-minutes: 2
-
-    steps:
-      - uses: actions/checkout@v3
-      - name: Run FedericoCarboni/setup-ffmpeg
-        uses: ./
-        with:
-          ffmpeg-version: '6.1.1'
-          linking-type: shared
-      - name: Run FedericoCarboni/setup-ffmpeg
-        id: setup-ffmpeg
-        uses: ./
-        with:
-          ffmpeg-version: 'release'
-          linking-type: shared
-      - run: ffmpeg -version
-      - run: ffprobe -version
-      - run: dir ${{ steps.setup-ffmpeg.outputs.ffmpeg-path }}

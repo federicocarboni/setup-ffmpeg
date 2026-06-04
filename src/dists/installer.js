@@ -6,7 +6,7 @@ import * as core from '@actions/core';
 import * as semver from 'semver';
 
 import {GyanInstaller} from './gyan';
-import {JohnVanSickleInstaller} from './johnvansickle';
+import {SunoReleaseInstaller} from './sunorelease';
 import {EvermeetCxInstaller} from './evermeet.cx';
 
 /**
@@ -42,12 +42,14 @@ import {EvermeetCxInstaller} from './evermeet.cx';
 
 /**
  * @param options {InstallerOptions}
- * @returns {GyanInstaller | JohnVanSickleInstaller | EvermeetCxInstaller}
+ * @returns {GyanInstaller | SunoReleaseInstaller | EvermeetCxInstaller}
  */
 function getInstaller(options) {
   const platform = os.platform();
   if (platform === 'linux') {
-    return new JohnVanSickleInstaller(options);
+    // Suno fork: Linux builds come from this repo's GitHub Releases, not
+    // johnvansickle.com. See dists/sunorelease.js.
+    return new SunoReleaseInstaller(options);
   } else if (platform === 'win32') {
     return new GyanInstaller(options);
   } else if (platform === 'darwin') {
