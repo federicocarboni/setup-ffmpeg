@@ -2,6 +2,7 @@
   "name": "setup-ffmpeg",
   "version": "3.0.0",
   "private": true,
+  "type": "module",
   "description": "Setup ffmpeg action",
   "scripts": {
     "build": "esbuild src/action.js --bundle --platform=node --target=es2024 --format=esm --outdir=dist",

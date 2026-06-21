@@ -23200,7 +23200,7 @@ function _getGlobal(key, defaultValue) {
 import * as assert from "assert";
 import * as path7 from "path";
 import { mkdir as mkdir2, rename as rename2 } from "fs/promises";
-var semver4 = __toESM(require_semver2());
+var semver4 = __toESM(require_semver2(), 1);
 
 // node_modules/.pnpm/uuid@9.0.1/node_modules/uuid/dist/esm-node/rng.js
 import crypto3 from "crypto";
@@ -23250,7 +23250,7 @@ function v4(options, buf, offset) {
 var v4_default = v4;
 
 // src/util.js
-var semver3 = __toESM(require_semver2());
+var semver3 = __toESM(require_semver2(), 1);
 import * as path6 from "path";
 import * as os7 from "os";
 
@@ -23392,7 +23392,7 @@ var EvermeetCxInstaller = class {
 };
 
 // src/dists/btbn.js
-var semver5 = __toESM(require_semver2());
+var semver5 = __toESM(require_semver2(), 1);
 import * as assert2 from "assert";
 import * as os8 from "os";
 
