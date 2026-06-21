@@ -59,18 +59,12 @@ function getInstaller(options) {
  */
 export async function install(options) {
   const installer = getInstaller(options);
-  let release;
-  let version = options.version;
-  if (version.toLowerCase() === 'git' || version.toLowerCase() === 'release') {
-    release = await installer.getLatestRelease();
-    version = release.version;
-  }
-  const toolInstallDir = tc.find(options.toolCacheDir, version, options.arch);
+  const release = await installer.getRelease();
+  const toolInstallDir = tc.find(options.toolCacheDir, release.version, options.arch);
   if (toolInstallDir) {
-    core.info(`Using ffmpeg version ${version} from tool cache`);
-    return {version, path: toolInstallDir, cacheHit: true};
+    core.info(`Using ffmpeg version ${release.version} from tool cache`);
+    return {version: release.version, path: toolInstallDir, cacheHit: true};
   }
-  if (!release) release = await installer.getRelease();
   core.info(`Installing ffmpeg version ${release.version} from ${release.downloadUrl}`);
   return {
     ...(await installer.downloadTool(release)),

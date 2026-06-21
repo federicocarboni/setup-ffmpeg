@@ -24571,18 +24571,12 @@ function getInstaller(options) {
 }
 async function install(options) {
   const installer = getInstaller(options);
-  let release;
-  let version2 = options.version;
-  if (version2.toLowerCase() === "git" || version2.toLowerCase() === "release") {
-    release = await installer.getLatestRelease();
-    version2 = release.version;
-  }
-  const toolInstallDir = find(options.toolCacheDir, version2, options.arch);
+  const release = await installer.getRelease();
+  const toolInstallDir = find(options.toolCacheDir, release.version, options.arch);
   if (toolInstallDir) {
-    info(`Using ffmpeg version ${version2} from tool cache`);
-    return { version: version2, path: toolInstallDir, cacheHit: true };
+    info(`Using ffmpeg version ${release.version} from tool cache`);
+    return { version: release.version, path: toolInstallDir, cacheHit: true };
   }
-  if (!release) release = await installer.getRelease();
   info(`Installing ffmpeg version ${release.version} from ${release.downloadUrl}`);
   return {
     ...await installer.downloadTool(release),
