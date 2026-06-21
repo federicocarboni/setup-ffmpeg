@@ -143,7 +143,7 @@ export class BtbNInstaller {
     const archivePath = await tc.downloadTool(release.downloadUrl[0]);
     // Flag x to override the default xz flag
     const extractPath = await tc.extractTar(archivePath, null, 'x');
-    const dir = path.join(extractPath, (await readdir(extractPath))[0]);
+    const dir = path.join(extractPath, (await readdir(extractPath))[0], "bin");
     const toolInstallDir = await tc.cacheDir(dir, this.toolCacheDir, release.version, this.arch);
     return {
       version: release.version,

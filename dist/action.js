@@ -24550,7 +24550,7 @@ var BtbNInstaller = class {
   async downloadTool(release) {
     const archivePath = await downloadTool(release.downloadUrl[0]);
     const extractPath = await extractTar(archivePath, null, "x");
-    const dir = path8.join(extractPath, (await (0, import_promises2.readdir)(extractPath))[0]);
+    const dir = path8.join(extractPath, (await (0, import_promises2.readdir)(extractPath))[0], "bin");
     const toolInstallDir = await cacheDir(dir, this.toolCacheDir, release.version, this.arch);
     return {
       version: release.version,
