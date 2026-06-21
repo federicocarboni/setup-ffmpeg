@@ -4,7 +4,7 @@
   "private": true,
   "description": "Setup ffmpeg action",
   "scripts": {
-    "build": "ncc build src/action.js",
+    "build": "esbuild src/action.js --bundle --platform=node --target=es2024 --format=esm --outdir=dist",
     "test": "jest",
     "format": "prettier --no-error-on-unmatched-pattern --config .prettierrc.json --write \"{src,test}/**/*.js\"",
     "lint": "eslint"
@@ -24,23 +24,22 @@
   },
   "homepage": "https://github.com/FedericoCarboni/setup-ffmpeg#readme",
   "devDependencies": {
-    "@octokit/core": "^5.0.2",
+    "@octokit/core": "^7.0.6",
     "@types/jest": "^29.5.11",
     "@types/node": "^20.10.4",
     "@types/semver": "^7.5.6",
     "@types/uuid": "^9.0.7",
-    "@vercel/ncc": "^0.38.1",
+    "esbuild": "^0.28.0",
     "eslint": "^8.55.0",
     "jest": "^29.7.0",
     "prettier": "^3.1.1",
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "@actions/core": "^1.10.1",
-    "@actions/exec": "^1.1.1",
-    "@actions/tool-cache": "^2.0.1",
+    "@actions/core": "^3.0.1",
+    "@actions/exec": "^3.0.0",
+    "@actions/tool-cache": "^4.0.0",
     "semver": "^7.5.4",
-    "undici": "^6.0.1",
     "uuid": "^9.0.1"
   }
 }

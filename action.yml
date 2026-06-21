@@ -4,7 +4,7 @@ author: Federico Carboni
 inputs:
   ffmpeg-version:
     description: 'Version of ffmpeg to use. Version Spec is only fully supported on Windows.'
-    default: release
+    default: latest
   architecture:
     description: 'Target architecture for FFmpeg, on Windows and MacOS only x64 is supported; on Linux arm64 may also be used. Defaults to the system architecture.'
   linking-type:
@@ -22,4 +22,4 @@ outputs:
     description: A boolean value to indicate whether the tool cache was hit
 runs:
   using: node24
-  main: dist/index.js
+  main: dist/action.js
