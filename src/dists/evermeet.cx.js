@@ -3,7 +3,7 @@ import * as path from 'path';
 import {mkdir, rename} from 'fs/promises';
 
 import * as tc from '@actions/tool-cache';
-import {fetch} from 'undici';
+import * as semver from 'semver';
 import {v4 as uuidV4} from 'uuid';
 
 import {USER_AGENT, cleanVersion, getTempDir} from '../util';
@@ -12,8 +12,8 @@ export class EvermeetCxInstaller {
   /**
    * @param options {import('./installer').InstallerOptions}
    */
-  constructor({version, arch, toolCacheDir, linkingType}) {
-    assert.strictEqual(arch, 'x64', 'Unsupported architecture (only x64 is supported)');
+  constructor({version, toolCacheDir, linkingType}) {
+    // assert.strictEqual(arch, 'x64', 'Unsupported architecture (only x64 is supported)');
     assert.strictEqual(linkingType, 'static', 'Only static linking is supported');
     this.version = version;
     this.toolCacheDir = toolCacheDir;
@@ -42,7 +42,7 @@ export class EvermeetCxInstaller {
    * @returns {Promise<import('./installer').ReleaseInfo>}
    * @private
    */
-  async getRelease(version, isGitRelease) {
+  async getRelease2(version, isGitRelease) {
     const ffmpeg = await this.getVersionAndUrls(
       'https://evermeet.cx/ffmpeg/info/ffmpeg/' + version,
     );
@@ -65,7 +65,7 @@ export class EvermeetCxInstaller {
   async getLatestRelease() {
     const isGitRelease = this.version.toLowerCase() === 'git';
     const releaseType = isGitRelease ? 'snapshot' : 'release';
-    const release = await this.getRelease(releaseType, isGitRelease);
+    const release = await this.getRelease2(releaseType, isGitRelease);
     return {...release, isGitRelease};
   }
   /**
@@ -74,12 +74,22 @@ export class EvermeetCxInstaller {
   async getAvailableReleases() {
     const releases = [await this.getLatestRelease()];
     if (this.version.toLowerCase() !== 'git' && this.version.toLowerCase() !== 'release') {
-      const release = await this.getRelease(cleanVersion(this.version), false);
+      const release = await this.getRelease2(cleanVersion(this.version), false);
       if (release && releases[0].version !== release.version) {
         releases.push(release);
       }
     }
     return releases;
+  }
+  async getRelease() {
+    const releases = await this.getAvailableReleases();
+    const installVer = semver.maxSatisfying(
+      releases.map(({version}) => version),
+      this.version,
+    );
+    const release = releases.find(({version}) => version === installVer);
+    assert.ok(release, `Requested version ${installVer} is not available`);
+    return release;
   }
   /**
    * @param {import('./installer').ReleaseInfo} release

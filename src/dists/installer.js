@@ -3,11 +3,10 @@ import * as os from 'os';
 
 import * as tc from '@actions/tool-cache';
 import * as core from '@actions/core';
-import * as semver from 'semver';
+// import * as semver from 'semver';
 
-import {GyanInstaller} from './gyan';
-import {JohnVanSickleInstaller} from './johnvansickle';
-import {EvermeetCxInstaller} from './evermeet.cx';
+import {EvermeetCxInstaller} from './evermeet.cx.js';
+import {BtbNInstaller} from './btbn.js';
 
 /**
  * @typedef {object} InstallerOptions
@@ -42,33 +41,16 @@ import {EvermeetCxInstaller} from './evermeet.cx';
 
 /**
  * @param options {InstallerOptions}
- * @returns {GyanInstaller | JohnVanSickleInstaller | EvermeetCxInstaller}
+ * @returns {BtbNInstaller | EvermeetCxInstaller}
  */
 function getInstaller(options) {
   const platform = os.platform();
-  if (platform === 'linux') {
-    return new JohnVanSickleInstaller(options);
-  } else if (platform === 'win32') {
-    return new GyanInstaller(options);
+  if (platform === 'linux' || platform === 'win32') {
+    return new BtbNInstaller(options);
   } else if (platform === 'darwin') {
     return new EvermeetCxInstaller(options);
   }
   assert.ok(false, 'Unsupported platform');
-}
-
-/**
- * @param installer {ReturnType<getInstaller>}
- * @param options {InstallerOptions}
- */
-async function getRelease(installer, options) {
-  const releases = await installer.getAvailableReleases();
-  const installVer = semver.maxSatisfying(
-    releases.map(({version}) => version),
-    options.version,
-  );
-  const release = releases.find(({version}) => version === installVer);
-  assert.ok(release, `Requested version ${installVer} is not available`);
-  return release;
 }
 
 /**
@@ -79,8 +61,7 @@ export async function install(options) {
   const installer = getInstaller(options);
   let release;
   let version = options.version;
-  if (version.toLowerCase() === 'git' || 
-      version.toLowerCase() === 'release') {
+  if (version.toLowerCase() === 'git' || version.toLowerCase() === 'release') {
     release = await installer.getLatestRelease();
     version = release.version;
   }
@@ -89,7 +70,7 @@ export async function install(options) {
     core.info(`Using ffmpeg version ${version} from tool cache`);
     return {version, path: toolInstallDir, cacheHit: true};
   }
-  if (!release) release = await getRelease(installer, options);
+  if (!release) release = await installer.getRelease();
   core.info(`Installing ffmpeg version ${release.version} from ${release.downloadUrl}`);
   return {
     ...(await installer.downloadTool(release)),
