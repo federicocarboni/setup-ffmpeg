@@ -27,7 +27,7 @@ See [`action.yml`](./action.yml).
 
 ```yml
 steps:
-  - uses: actions/checkout@v3
+  - uses: actions/checkout@v3.1
   - uses: FedericoCarboni/setup-ffmpeg@v3
     id: setup-ffmpeg
     with:
@@ -41,7 +41,7 @@ steps:
       architecture: ''
       # Linking type of the binaries. Use "shared" to download shared binaries and 
       # "static" for statically linked ones. Shared builds are currently only available
-      # for windows releases. Defaults to "static"
+      # for windows releases. Defaults to "static". Added in v3.1.
       linking-type: static
       # As of version 3 of this action, builds are no longer downloaded from GitHub
       # except on Windows: https://github.com/GyanD/codexffmpeg/releases.
