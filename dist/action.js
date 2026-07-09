@@ -24572,7 +24572,7 @@ function getInstaller(options) {
 async function install(options) {
   const installer = getInstaller(options);
   const release = await installer.getRelease();
-  const toolInstallDir = find(options.toolCacheDir, release.version, options.arch);
+  const toolInstallDir = options.version.toLowerCase() !== "git" && find(options.toolCacheDir, release.version, options.arch);
   if (toolInstallDir) {
     info(`Using ffmpeg version ${release.version} from tool cache`);
     return { version: release.version, path: toolInstallDir, cacheHit: true };
