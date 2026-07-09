@@ -6,24 +6,46 @@ on:
       - '**.md'
 
 jobs:
-  test-arch:
+  test-arm64:
     runs-on: ubuntu-latest
     timeout-minutes: 2
 
     steps:
       - uses: actions/checkout@v3
-      - name: Run FedericoCarboni/setup-ffmpeg
+      - name: Run federicocarboni/setup-ffmpeg
         uses: ./
         with:
           architecture: arm64
-      - name: Run FedericoCarboni/setup-ffmpeg
+      - name: Run federicocarboni/setup-ffmpeg
         uses: ./
         with:
           architecture: arm64
       - run: which ffmpeg
       - run: which ffprobe
 
-  test:
+  test-git:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 2
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run federicocarboni/setup-ffmpeg
+        uses: ./
+        with:
+          ffmpeg-version: git
+      - name: Run federicocarboni/setup-ffmpeg
+        uses: ./
+        with:
+          ffmpeg-version: git
+      - run: ffmpeg -version
+      - run: ffprobe -version
+
+  test-release:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 2
 
@@ -34,49 +56,34 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Run FedericoCarboni/setup-ffmpeg
+      - name: Run federicocarboni/setup-ffmpeg
         uses: ./
-      - name: Run FedericoCarboni/setup-ffmpeg
+      - name: Run federicocarboni/setup-ffmpeg
         uses: ./
-      - run: ffmpeg -version
-      - run: ffprobe -version
-      - name: Run FedericoCarboni/setup-ffmpeg
-        uses: ./
-        with:
-          ffmpeg-version: git
-      - name: Run FedericoCarboni/setup-ffmpeg
-        uses: ./
-        with:
-          ffmpeg-version: git
-      - run: ffmpeg -version
-      - run: ffprobe -version
-      - name: Run FedericoCarboni/setup-ffmpeg
-        uses: ./
-        with:
-          ffmpeg-version: '5.1.1'
-      - name: Run FedericoCarboni/setup-ffmpeg
-        uses: ./
-        with:
-          ffmpeg-version: '5.1.1'
       - run: ffmpeg -version
       - run: ffprobe -version
 
   test-shared:
-    runs-on: windows-latest
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 2
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
 
     steps:
       - uses: actions/checkout@v3
-      - name: Run FedericoCarboni/setup-ffmpeg
+      - name: Run federicocarboni/setup-ffmpeg
         uses: ./
         with:
-          ffmpeg-version: '6.1.1'
+          ffmpeg-version: '8'
           linking-type: shared
-      - name: Run FedericoCarboni/setup-ffmpeg
+      - name: Run federicocarboni/setup-ffmpeg
         id: setup-ffmpeg
         uses: ./
         with:
-          ffmpeg-version: 'release'
+          ffmpeg-version: '8'
           linking-type: shared
       - run: ffmpeg -version
       - run: ffprobe -version
