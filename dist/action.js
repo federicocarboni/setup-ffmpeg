@@ -24479,7 +24479,7 @@ var BtbNInstaller = class {
       if (platform5 !== this.platform || buildType !== this.buildType) {
         continue;
       }
-      const version2 = rawVersion !== "master" ? normalizeVersion(rawVersion.slice(1), false) : void 0;
+      const version2 = rawVersion !== "master" ? normalizeVersion(rawVersion.slice(1), false) : "0.0.0-git";
       if (isGitBuild && rawVersion === "master") {
         return {
           version: version2,

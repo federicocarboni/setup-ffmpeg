@@ -60,8 +60,10 @@ export class BtbNInstaller {
       if (platform !== this.platform || buildType !== this.buildType) {
         continue;
       }
+      // Use a fake 0.0.0-git version for git master builds, since they cannot
+      // be cached anyway
       const version =
-        rawVersion !== 'master' ? normalizeVersion(rawVersion.slice(1), false) : undefined;
+        rawVersion !== 'master' ? normalizeVersion(rawVersion.slice(1), false) : '0.0.0-git';
       if (isGitBuild && rawVersion === 'master') {
         return {
           version,
