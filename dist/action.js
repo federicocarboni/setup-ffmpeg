@@ -23351,6 +23351,9 @@ var EvermeetCxInstaller = class {
     return releases;
   }
   async getRelease() {
+    if (this.version.toLowerCase() === "git" || this.version.toLowerCase() === "release") {
+      return await this.getLatestRelease();
+    }
     const releases = await this.getAvailableReleases();
     const installVer = semver4.maxSatisfying(
       releases.map(({ version: version2 }) => version2),
