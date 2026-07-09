@@ -24498,7 +24498,7 @@ var BtbNInstaller = class {
   }
   /** @returns {Promise<import('./installer').ReleaseInfo>} */
   async getRelease() {
-    if (this.version === "git" || this.version === "latest") {
+    if (this.version === "git" || this.version === "release") {
       return await this.getLatestRelease();
     }
     let page = 1;
